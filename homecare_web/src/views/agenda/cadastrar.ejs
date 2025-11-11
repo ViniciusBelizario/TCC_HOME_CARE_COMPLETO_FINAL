@@ -1,0 +1,9 @@
+<form method="post" action="/agenda/cadastrar" class="form">
+  <%- include('../components/input', { label:'Paciente', name:'paciente', required:true }) %>
+  <%- include('../components/input', { label:'Profissional', name:'profissional', required:true }) %>
+  <%- include('../components/input', { label:'Data/Hora', name:'data', type:'datetime-local', required:true }) %>
+  <div class="form__actions">
+    <a href="/agenda" class="btn btn--ghost">Cancelar</a>
+    <button class="btn">Salvar</button>
+  </div>
+</form>

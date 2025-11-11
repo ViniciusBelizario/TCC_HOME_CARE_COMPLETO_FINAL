@@ -1,0 +1,115 @@
+<!-- src/views/medico/agenda.ejs -->
+<link rel="stylesheet" href="/css/agenda.css" />
+
+<section class="agenda-wrap">
+  <div class="agenda-header">
+    <div class="agenda-actions">
+      <div class="dropdown">
+        <button id="btnDisponibilizar" class="btn">Disponibilizar agenda ▾</button>
+        <div id="menuDisponibilizar" class="dropdown__menu" role="menu" aria-hidden="true">
+          <button class="dropdown__item" data-action="especifica">Disponibilizar específica</button>
+          <button class="dropdown__item" data-action="lote">Disponibilizar em lote</button>
+        </div>
+      </div>
+    </div>
+
+    <h1 id="agendaData" class="agenda-date">-- de ------</h1>
+
+    <div class="agenda-month-nav">
+      <button class="btn btn--ghost btn--sm" id="prevMonth" aria-label="Mês anterior">◀</button>
+      <button class="btn btn--ghost btn--sm" id="todayBtn" aria-label="Hoje">Hoje</button>
+      <button class="btn btn--ghost btn--sm" id="nextMonth" aria-label="Próximo mês">▶</button>
+    </div>
+  </div>
+
+  <div class="agenda-grid">
+    <div class="agenda-calendar">
+      <div class="calendar-head">
+        <div class="month-title" id="monthTitle">Mês Ano</div>
+        <div class="weekdays">
+          <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+        </div>
+      </div>
+      <div id="calendarDays" class="calendar-days"></div>
+    </div>
+
+    <aside class="agenda-panel" id="agendaPanel">
+      <h2 class="panel-title">Consultas do dia</h2>
+
+      <div class="panel-section">
+        <h3>Confirmadas</h3>
+        <ul id="listaConfirmadas" class="appt-list empty">
+          <li class="empty-msg">—</li>
+        </ul>
+      </div>
+
+      <div class="panel-section">
+        <h3>Aguardando confirmação</h3>
+        <ul id="listaPendentes" class="appt-list empty">
+          <li class="empty-msg">—</li>
+        </ul>
+      </div>
+
+      <div class="panel-section">
+        <h3>Disponíveis</h3>
+        <ul id="listaDisponiveis" class="appt-list empty">
+          <li class="empty-msg">—</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- Modais -->
+<script type="text/template" id="tplModalEspecifica">
+  <div class="modal">
+    <div class="modal__card">
+      <h2 class="modal__title">Disponibilizar específica – <span class="modal__date"></span></h2>
+      <form class="modal__form" id="formEspecifica">
+        <label class="field">
+          <span>Horário de início</span>
+          <input type="time" name="inicio" required>
+        </label>
+        <label class="field">
+          <span>Horário de término</span>
+          <input type="time" name="fim" required>
+        </label>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--ghost" data-close>Cancelar</button>
+          <button type="submit" class="btn">Disponibilizar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</script>
+
+<script type="text/template" id="tplModalLote">
+  <div class="modal">
+    <div class="modal__card">
+      <h2 class="modal__title">Disponibilizar em lote – <span class="modal__date"></span></h2>
+      <form class="modal__form" id="formLote">
+        <label class="field">
+          <span>Início do dia</span>
+          <input type="time" name="inicioDia" required>
+        </label>
+        <label class="field">
+          <span>Fim do dia</span>
+          <input type="time" name="fimDia" required>
+        </label>
+        <label class="field">
+          <span>Intervalo entre consultas (minutos)</span>
+          <input type="number" name="intervalo" min="5" step="5" required placeholder="Ex.: 30">
+        </label>
+        <div class="modal__footer">
+          <button type="button" class="btn btn--ghost" data-close>Cancelar</button>
+          <button type="submit" class="btn">Disponibilizar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</script>
+
+<script>
+  window.MEDICO = <%- JSON.stringify({ doctorId: doctorId || null, auth: auth || {} }) %>;
+</script>
+<script src="/js/agenda.medico.js"></script>

@@ -1,0 +1,49 @@
+<link rel="stylesheet" href="/css/paciente.css">
+
+<section class="pacientes-container">
+  <div class="pacientes-header">
+    <h1><%= titulo %></h1>
+
+    <div class="search">
+      <input id="q" class="input" placeholder="Buscar por nome ou CPF" />
+    </div>
+
+    <button class="btn btn--primary" id="btnCadastrar">Cadastrar Paciente</button>
+  </div>
+
+  <div class="pacientes-table">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Telefone</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="pacientesTbody">
+        <% (pacientes || []).forEach(p => { %>
+          <tr data-id="<%= p.id %>">
+            <td><%= p.id %></td>
+            <td><%= p.name %></td>
+            <td><%= p.patientProfile?.phone || '-' %></td>
+            <td><button class="btn btn--sm btn-detail">Detalhe</button></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div id="toast-stack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+<div class="modal-root">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-slot"></div>
+</div>
+
+<script>
+  window.PACIENTES = <%- JSON.stringify(pacientes || []) %>;
+  window.AUTH = <%- JSON.stringify(auth || {}) %>;
+</script>
+<script src="/js/paciente.js"></script>

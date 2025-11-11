@@ -1,0 +1,46 @@
+<link rel="stylesheet" href="/css/paciente.css">
+
+<section class="pacientes-container">
+  <div class="pacientes-header">
+    <h1>Pacientes (Médico)</h1>
+    <div class="search">
+      <input id="q" class="input" placeholder="Buscar por nome ou CPF" />
+    </div>
+  </div>
+
+  <div class="pacientes-table">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Telefone</th>
+          <th>Atualizado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="pacientesTbody">
+        <% (pacientes || []).forEach(p => { %>
+          <tr data-id="<%= p.id %>">
+            <td><%= p.id %></td>
+            <td><%= p.name %></td>
+            <td><%= p.patientProfile?.phone || '-' %></td>
+            <td><%= p.updatedAt ? new Date(p.updatedAt).toLocaleString('pt-BR') : '—' %></td>
+            <td><button class="btn btn--sm btn-detail">Ver</button></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="modal-root">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-slot"></div>
+</div>
+
+<script>
+  window.PACIENTES = <%- JSON.stringify(pacientes || []) %>;
+  window.AUTH = <%- JSON.stringify(auth || {}) %>;
+</script>
+<script src="/js/paciente-medico.js"></script>

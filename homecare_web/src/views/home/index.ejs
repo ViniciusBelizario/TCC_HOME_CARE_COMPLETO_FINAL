@@ -1,0 +1,128 @@
+<%- include('../partials/_head') %>
+<link rel="stylesheet" href="/css/home.css" />
+
+<%
+  // Papéis vindos de res.locals.auth (mesmo padrão da sidebar)
+  const r = (typeof auth?.role === 'string' ? auth.role : '').toUpperCase();
+  const isAdmin = !!auth?.isAdmin;
+  const isAtendente = !!auth?.isAtendente;
+  const isMedico = !!auth?.isMedico;
+
+  // Rotas iguais às usadas na sidebar (mantém padrão)
+  const PACIENTES_PATH = isMedico ? '/pacientes-medico' : '/pacientes';
+  const ROUTES = {
+    home: '/',
+    agenda: '/agenda',
+    pacientes: PACIENTES_PATH,
+    cadastro: '/cadastro',
+    relatorio: '/relatorio',
+    perfil: '/perfil',
+  };
+%>
+
+<div class="home-wrap">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero__inner">
+      <div class="hero__left">
+        <h1 class="hero__title">Bem-vindo ao <span>Connect Health</span></h1>
+        <p class="hero__subtitle">
+          Plataforma de gestão para atendimento domiciliar: agenda inteligente, cadastro de pacientes,
+          acompanhamento de consultas e relatórios — tudo em um só lugar.
+        </p>
+        <div class="hero__cta">
+          <% if (isAtendente || isMedico) { %>
+            <a class="btn" href="<%= ROUTES.agenda %>">Abrir Agenda</a>
+          <% } %>
+          <a class="btn btn--ghost" href="<%= ROUTES.perfil %>">Ver meu Perfil</a>
+        </div>
+      </div>
+      <div class="hero__right">
+        <div class="hero-card">
+          <div class="hero-card__stat">
+            <div class="k">Seu papel</div>
+            <div class="v"><%= r || '—' %></div>
+          </div>
+          <div class="hero-card__stat">
+            <div class="k">Acesso rápido</div>
+            <div class="v">
+              <% if (isAtendente || isMedico) { %>
+                Agenda, Pacientes
+              <% } else if (isAdmin) { %>
+                Cadastro, Relatórios
+              <% } else { %>
+                Perfil
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES / recursos do sistema -->
+  <section class="features">
+    <article class="feat">
+      <div class="feat__icon">🗓️</div>
+      <h3 class="feat__title">Agenda de Home Care</h3>
+      <p class="feat__desc">
+        Disponibilize horários individuais ou em lote, visualize confirmadas e pendentes, e gerencie confirmações.
+      </p>
+      <% if (isAtendente || isMedico) { %>
+        <a class="link" href="<%= ROUTES.agenda %>">Ir para Agenda →</a>
+      <% } %>
+    </article>
+
+    <article class="feat">
+      <div class="feat__icon">👥</div>
+      <h3 class="feat__title">Pacientes</h3>
+      <p class="feat__desc">
+        Cadastro completo com dados essenciais para o atendimento, histórico e informações de contato.
+      </p>
+      <% if (isAtendente || isMedico) { %>
+        <a class="link" href="<%= ROUTES.pacientes %>">Abrir Pacientes →</a>
+      <% } %>
+    </article>
+
+    <article class="feat">
+      <div class="feat__icon">📊</div>
+      <h3 class="feat__title">Relatórios</h3>
+      <p class="feat__desc">
+        Exportação de dados e visualizações para acompanhamento operacional e decisão técnica.
+      </p>
+      <% if (isAdmin) { %>
+        <a class="link" href="<%= ROUTES.relatorio %>">Ver Relatórios →</a>
+      <% } %>
+    </article>
+
+    <article class="feat">
+      <div class="feat__icon">🧩</div>
+      <h3 class="feat__title">Cadastro de Usuários</h3>
+      <p class="feat__desc">
+        Gestão de administradores, atendentes e médicos com papéis e permissões.
+      </p>
+      <% if (isAdmin) { %>
+        <a class="link" href="<%= ROUTES.cadastro %>">Ir para Cadastro →</a>
+      <% } %>
+    </article>
+  </section>
+
+  <!-- AÇÕES RÁPIDAS -->
+  <section class="quick">
+    <h2 class="quick__title">Ações rápidas</h2>
+    <div class="quick__grid">
+      <% if (isAtendente || isMedico) { %>
+        <a class="qbtn" href="<%= ROUTES.agenda %>">+ Disponibilizar horários</a>
+        <a class="qbtn" href="<%= ROUTES.pacientes %>">+ Novo paciente</a>
+      <% } %>
+      <% if (isAdmin) { %>
+        <a class="qbtn" href="<%= ROUTES.cadastro %>">+ Criar usuário</a>
+        <a class="qbtn" href="<%= ROUTES.relatorio %>">→ Exportar relatórios</a>
+      <% } %>
+      <a class="qbtn" href="<%= ROUTES.perfil %>">⚙️ Meu perfil</a>
+    </div>
+  </section>
+</div>
+
+<script src="/js/home.js"></script>
+<%- include('../partials/_foot') %>

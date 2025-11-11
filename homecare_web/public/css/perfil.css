@@ -1,0 +1,121 @@
+/* ===== Full-bleed wrapper: expande além do .container SEM mexer no layout global ===== */
+.perfil-bleed{
+  /* ocupa toda a largura da viewport mesmo estando dentro do .container */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+/* Skeleton e Cartão centralizados dentro do full-bleed */
+.perfil-bleed .skeleton,
+.perfil-bleed .profile-strip{
+  width: 100%;
+  max-width: 1100px;      /* ajuste para 1240px se quiser mais largo */
+  margin: 24px auto;
+}
+
+/* ===== Estilos do cartão horizontal ===== */
+:root{
+  --bg:#f6f9fc;
+  --card:#fff;
+  --border:#d9e3ee;
+  --text:#0f1e33;
+  --muted:#54657a;
+  --primary:#2d6cdf;
+  --admin:#8e44ad; --medico:#11a36a; --atendente:#2d92ff;
+}
+
+/* SKELETON */
+.skeleton{
+  height: 280px;
+  border-radius: 16px;
+  border:1px solid var(--border);
+  background: linear-gradient(90deg, #f1f5fb, #ffffff, #f1f5fb);
+  background-size: 200% 100%;
+  animation: shimmer 1.1s infinite;
+}
+@keyframes shimmer{ 0%{background-position:0 0} 100%{background-position:-200% 0} }
+
+/* CARTÃO */
+.profile-strip{
+  background: var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  box-shadow: 0 14px 36px rgba(0,0,0,.06);
+  overflow:hidden;
+}
+
+/* Header com gradiente e avatar */
+.strip__header{
+  position:relative;
+  height: 130px;
+  background: linear-gradient(180deg, #eef3ff 0%, #ffffff 75%);
+  border-bottom:1px solid var(--border);
+}
+.avatar{
+  position:absolute; left:50%; top:100%;
+  transform: translate(-50%, -50%);
+  width:96px; height:96px; border-radius:50%;
+  background:#dde6f8; color:#1b2a44; display:flex; align-items:center; justify-content:center;
+  font-weight:900; font-size:30px; border: 3px solid #fff; box-shadow:0 8px 22px rgba(0,0,0,.12);
+}
+
+/* Identificação */
+.strip__ident{
+  margin-top: 64px;
+  text-align:center; padding: 6px 18px 10px;
+}
+.name{ margin:0 0 6px; font-size:24px; font-weight:900; color:var(--text); letter-spacing:.2px; }
+.role{
+  display:inline-flex; padding:6px 12px; border-radius:999px; font-weight:900; font-size:12px;
+  border:1px solid var(--border); background:#fff; color:#2f3b4d; letter-spacing:.5px;
+}
+.role.role--admin{ color:var(--admin); border-color:#ead7fb; background:#faf5ff }
+.role.role--medico{ color:var(--medico); border-color:#cfeee2; background:#f2fcf7 }
+.role.role--atendente{ color:var(--atendente); border-color:#d7e9ff; background:#f5faff }
+
+/* Informações em DUAS colunas */
+.info-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  padding: 10px 26px 6px;
+}
+.info-grid--one{ grid-template-columns: 1fr; }
+.kv{ display:grid; gap:10px; }
+.kv__row{ display:flex; gap:12px; }
+.kv__k{ width:160px; text-align:right; color:var(--muted); font-weight:800; }
+.kv__v{ flex:1; color:var(--text); font-weight:800; }
+.mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+/* Bloco Profissional (médico) */
+.pro-block{ padding: 6px 26px 0; }
+.pro-title{
+  text-align:center; color:var(--muted); font-weight:900; font-size:13px;
+  margin-bottom: 2px;
+  border-top:1px dashed var(--border);
+  padding-top: 12px;
+}
+
+/* Ações */
+.actions{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding: 14px 26px 18px; border-top:1px solid var(--border); background:#fff;
+}
+.actions__right{ display:flex; gap:8px; flex-wrap:wrap; }
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:9px 14px; border-radius:10px; cursor:pointer; font-weight:900;
+  border:1px solid #e0e7f2; background:var(--primary); color:#fff; box-shadow:0 6px 16px rgba(45,108,223,.22);
+}
+.btn--ghost{ background:#fff; color:#1b2a44; border:1px solid #d9e3ee; box-shadow:none }
+.btn--light{ background:#f6f9ff; color:#1b2a44; border:1px solid #e2eaf7; }
+
+/* Responsivo */
+@media (max-width: 980px){
+  .perfil-bleed .skeleton,
+  .perfil-bleed .profile-strip{ max-width: 95vw; }
+  .info-grid{ grid-template-columns: 1fr; }
+  .kv__k{ width: 120px; text-align:left; }
+}

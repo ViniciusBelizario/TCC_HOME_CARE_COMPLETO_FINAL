@@ -1,0 +1,19 @@
+<!--src\views\layouts\layout.ejs-->
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <link rel="stylesheet" href="/css/notifications.css">
+  <head><%- include('../partials/_head') %></head>
+  <body class="app">
+    <%- include('../partials/_sidebar') %>
+    <div class="app__content">
+      <%- include('../partials/_header') %>
+      <main class="main">
+        <div class="container">
+          <%- body %>  <!-- as views entram aqui -->
+        </div>
+      </main>
+    </div>
+
+    <%- include('../partials/_foot') %>
+  </body>
+</html>

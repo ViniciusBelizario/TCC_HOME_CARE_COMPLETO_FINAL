@@ -1,0 +1,76 @@
+<%- include('../partials/_head') %>
+<link rel="stylesheet" href="/css/perfil.css?v=5" />
+
+<!-- NÃO mexemos no layout. Aqui dentro do container, abrimos um wrapper "full-bleed" -->
+<div class="perfil-bleed">
+  <!-- Skeleton (mesma largura do cartão) -->
+  <div id="skeleton" class="skeleton" style="<%= user ? 'display:none' : '' %>"></div>
+
+  <!-- Cartão horizontal centralizado -->
+  <section id="perfilWrap" class="profile-strip" style="<%= user ? '' : 'display:none' %>">
+    <div class="strip__header">
+      <div class="avatar" id="avatar">
+        <% if (user) { %>
+          <%= (user.name || '?').split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase() %>
+        <% } else { %>??<% } %>
+      </div>
+    </div>
+
+    <div class="strip__ident">
+      <h1 class="name" id="pfName"><%= user?.name || '—' %></h1>
+      <span class="role" id="pfRole"><%= (user?.role || '—') %></span>
+    </div>
+
+    <div class="info-grid">
+      <div class="kv">
+        <div class="kv__row">
+          <div class="kv__k">E-mail :</div>
+          <div class="kv__v mono" id="pfEmail"><%= user?.email || '—' %></div>
+        </div>
+        <div class="kv__row">
+          <div class="kv__k">CPF :</div>
+          <div class="kv__v mono" id="pfCPF"><%= user?.cpf || '—' %></div>
+        </div>
+      </div>
+
+      <div class="kv">
+        <div class="kv__row">
+          <div class="kv__k">Criado em :</div>
+          <div class="kv__v" id="pfCreated"><%= user?.createdAt || '—' %></div>
+        </div>
+        <div class="kv__row">
+          <div class="kv__k">Atualizado em :</div>
+          <div class="kv__v" id="pfUpdated"><%= user?.updatedAt || '—' %></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="medBlock" class="pro-block" style="<%= (user && user.role === 'MEDICO') ? '' : 'display:none' %>">
+      <div class="pro-title">Profissional</div>
+      <div class="info-grid info-grid--one">
+        <div class="kv">
+          <div class="kv__row">
+            <div class="kv__k">CRM :</div>
+            <div class="kv__v" id="pfCRM"><%= user?.doctorProfile?.crm || '—' %></div>
+          </div>
+          <div class="kv__row">
+            <div class="kv__k">Especialidade :</div>
+            <div class="kv__v" id="pfSpec"><%= user?.doctorProfile?.specialty || '—' %></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="btnRefresh" class="btn btn--ghost">Atualizar</button>
+      <div class="actions__right">
+        <button id="copyName"  class="btn btn--light">Copiar nome</button>
+        <button id="copyEmail" class="btn btn--light">Copiar e-mail</button>
+        <button id="copyCPF"  class="btn btn--light">Copiar CPF</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>window.__PROFILE_BOOT__ = <%- JSON.stringify(user || null) %>;</script>
+<script src="/js/perfil.js?v=5"></script>

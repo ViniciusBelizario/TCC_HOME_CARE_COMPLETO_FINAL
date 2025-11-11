@@ -1,0 +1,120 @@
+<!-- src/views/relatorio/index.ejs -->
+<link rel="stylesheet" href="/css/relatorio.css?v=1">
+
+<section class="page page--relatorio">
+  <header class="page__header">
+    <h1>Relatórios</h1>
+  </header>
+
+  <!-- Filtros -->
+  <div class="card filters">
+    <div class="filters__row">
+      <div class="filters__item">
+        <label for="from">De</label>
+        <input type="date" id="from" />
+      </div>
+      <div class="filters__item">
+        <label for="to">Até</label>
+        <input type="date" id="to" />
+      </div>
+      <div class="filters__item">
+        <label for="doctorId">Médico</label>
+        <select id="doctorId">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <div class="filters__item">
+        <button id="btn-aplicar" class="btn btn--primary">Aplicar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis-grid">
+    <div class="kpi-card"><span class="kpi-label">Total</span><strong class="kpi-value" id="kpi-total">-</strong></div>
+    <div class="kpi-card"><span class="kpi-label">Solicitadas</span><strong class="kpi-value" id="kpi-requested">-</strong></div>
+    <div class="kpi-card"><span class="kpi-label">Aceitas</span><strong class="kpi-value" id="kpi-accepted">-</strong></div>
+    <div class="kpi-card"><span class="kpi-label">Negadas</span><strong class="kpi-value" id="kpi-denied">-</strong></div>
+    <div class="kpi-card"><span class="kpi-label">Canceladas</span><strong class="kpi-value" id="kpi-canceled">-</strong></div>
+    <div class="kpi-card"><span class="kpi-label">Concluídas</span><strong class="kpi-value" id="kpi-completed">-</strong></div>
+    <div class="kpi-card"><span class="kpi-label">Duração média (min)</span><strong class="kpi-value" id="kpi-avgDuration">-</strong></div>
+    <div class="kpi-card"><span class="kpi-label">Utilização</span><strong class="kpi-value" id="kpi-utilRate">-</strong></div>
+  </div>
+
+  <!-- Consultas por dia -->
+  <div class="card">
+    <div class="card__header">
+      <h2>Consultas por dia</h2>
+      <div class="card__actions">
+        <button id="csv-aggregate" class="btn btn--ghost">Baixar CSV</button>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-aggregate" height="120"></canvas>
+    </div>
+    <div class="table-wrap">
+      <table class="table" id="table-aggregate">
+        <thead>
+          <tr>
+            <th>Data</th><th>Médico</th><th>Solicitadas</th><th>Aceitas</th><th>Negadas</th>
+            <th>Canceladas</th><th>Concluídas</th><th>Total</th><th>Duração média (min)</th><th>Taxa de conclusão</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Utilização por médico -->
+  <div class="card">
+    <div class="card__header">
+      <h2>Utilização por médico</h2>
+      <div class="card__actions">
+        <button id="csv-utilization" class="btn btn--ghost">Baixar CSV</button>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart-utilization" height="120"></canvas>
+    </div>
+    <div class="table-wrap">
+      <table class="table" id="table-utilization">
+        <thead>
+          <tr>
+            <th>Médico</th><th>Atendimentos</th><th>Min agendados (consulta)</th>
+            <th>Min disponíveis</th><th>Min agendados (slots)</th><th>Utilização</th><th>Média atend./dia</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Detalhado -->
+  <div class="card">
+    <div class="card__header">
+      <h2>Consultas — detalhado</h2>
+      <div class="card__actions">
+        <button id="csv-detailed" class="btn btn--ghost">Baixar CSV</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="table" id="table-detailed">
+        <thead>
+          <tr>
+            <th>Médico</th><th>Solicitadas</th><th>Aceitas</th><th>Negadas</th>
+            <th>Canceladas</th><th>Concluídas</th><th>Total</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Config para o JS -->
+  <div id="relatorio-config" data-baseurl="<%= apiBaseUrl %>" data-token="<%= auth?.token || '' %>"></div>
+</section>
+
+<!-- Chart.js (somente nesta página) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<!-- Script da página -->
+<script src="/js/relatorio.js"></script>

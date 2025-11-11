@@ -1,0 +1,1413 @@
+{
+	"info": {
+		"_postman_id": "25cae8ff-19cb-4e25-8bb4-dd81d7769483",
+		"name": "TCC Homecare API — Coleção Única (pt-BR)",
+		"description": "Coleção Postman em português para testar TODAS as rotas do backend (Node.js + Express + Sequelize). Fluxo com papéis: ADMIN, ATENDENTE, MÉDICO, PACIENTE. Inclui testes que salvam tokens automaticamente nas variáveis da COLEÇÃO.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33126385"
+	},
+	"item": [
+		{
+			"name": "Autenticação e Cadastros (por Papel)",
+			"item": [
+				{
+					"name": "Login — Admin (seed)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"  const j = pm.response.json();",
+									"  pm.collectionVariables.set('tokenAdmin', j.token);",
+									"  pm.test('Admin logado', () => pm.expect(j.token).to.be.a('string'));",
+									"} else { pm.test('Falha login admin', () => pm.expect.fail(pm.response.code)); }"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@tcc.com\",\n  \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login — Atendente (seed)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"  const j = pm.response.json();",
+									"  pm.collectionVariables.set('tokenAtendente', j.token);",
+									"  pm.test('Atendente logado', () => pm.expect(j.token).to.be.a('string'));",
+									"} else { pm.test('Falha login atendente', () => pm.expect.fail(pm.response.code)); }"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"atendente@tcc.com\",\n  \"password\": \"atendente123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login — Médico (seed)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"  const j = pm.response.json();",
+									"  pm.collectionVariables.set('tokenMedico', j.token);",
+									"  pm.collectionVariables.set('medicoId', j.user.id);",
+									"  pm.test('Médico logado', () => pm.expect(j.token).to.be.a('string'));",
+									"} else { pm.test('Falha login médico', () => pm.expect.fail(pm.response.code)); }"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"medico@tcc.com\",\n  \"password\": \"medico123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login — Paciente (seed)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"  const j = pm.response.json();",
+									"  pm.collectionVariables.set('tokenPaciente', j.token);",
+									"  pm.collectionVariables.set('pacienteId', j.user.id);",
+									"  pm.test('Paciente logado', () => pm.expect(j.token).to.be.a('string'));",
+									"} else { pm.test('Falha login paciente', () => pm.expect.fail(pm.response.code)); }"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"paciente@tcc.com\",\n  \"password\": \"paciente123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastro público desativado (deve retornar 403)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Teste\",\n  \"email\": \"teste@tcc.com\",\n  \"password\": \"123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Registrar Paciente (ATENDENTE)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenAtendente}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Paciente Novo\",\n  \"email\": \"paciente.novo@tcc.com\",\n  \"cpf\": \"33333333334\",\n  \"password\": \"paciente123\",\n  \"phone\": \"11988880000\",\n  \"address\": \"Rua Nova, 456\",\n  \"birthDate\": \"1995-05-10\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register/patient",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register",
+								"patient"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Registrar Médico (ATENDENTE ou ADMIN)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenAtendente}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Dr. Novo\",\n  \"email\": \"medico.novo@tcc.com\",\n  \"cpf\": \"55555555555\",\n  \"password\": \"medico123\",\n  \"specialty\": \"Clínico Geral\",\n  \"crm\": \"CRM-SP-999999\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register/doctor",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register",
+								"doctor"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Registrar Atendente (ADMIN)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenAdmin}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Atendente Nova\",\n  \"email\": \"atendente.nova@tcc.com\",\n  \"cpf\": \"66666666666\",\n  \"password\": \"atendente123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register/attendant",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register",
+								"attendant"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Meu Perfil (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenAdmin}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Meu Perfil (Atendente)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenAtendente}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Meu Perfil (Médico)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenMedico}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Meu Perfil (Paciente)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenPaciente}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Login para cada papel e cadastros controlados (sem auto-cadastro público)."
+		},
+		{
+			"name": "Médicos (público)",
+			"item": [
+				{
+					"name": "Listar médicos (GET /doctors?q=)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/doctors?q={{q}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"doctors"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "{{q}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Pacientes (MÉDICO e ATENDENTE)",
+			"item": [
+				{
+					"name": "Listar pacientes (MÉDICO)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenMedico}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/patients",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar pacientes (ATENDENTE)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenAtendente}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/patients",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ver paciente por ID (MÉDICO)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenMedico}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/patients/{{pacienteId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patients",
+								"{{pacienteId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ver paciente por ID (ATENDENTE)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenAtendente}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/patients/{{pacienteId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patients",
+								"{{pacienteId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar paciente (ATENDENTE)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenAtendente}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Paciente Atualizado\",\n  \"email\": \"paciente.atualizado@tcc.com\",\n  \"phone\": \"11970001234\",\n  \"address\": \"Rua Alterada, 789\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/patients/{{pacienteId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patients",
+								"{{pacienteId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar paciente (MÉDICO)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenMedico}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Paciente Atualizado por Médico\",\n  \"phone\": \"11970002222\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/patients/{{pacienteId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patients",
+								"{{pacienteId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Disponibilidade (Agenda do Médico)",
+			"item": [
+				{
+					"name": "Criar slot — MÉDICO (para si)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"  const s = pm.response.json();",
+									"  pm.collectionVariables.set('slotId', s.id);",
+									"  pm.test('Slot criado e salvo em {{slotId}}', () => pm.expect(s.id).to.exist);",
+									"} else { pm.test('Falha ao criar slot', () => pm.expect.fail(pm.response.code)); }"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenMedico}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"startsAt\": \"2025-09-10T13:00:00.000Z\",\n  \"endsAt\": \"2025-09-10T14:00:00.000Z\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/availability",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"availability"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Criar slot — ATENDENTE (para um médico)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"  const s = pm.response.json();",
+									"  pm.collectionVariables.set('slotId', s.id);",
+									"  pm.test('Slot (atendente) criado e salvo', () => pm.expect(s.id).to.exist);",
+									"} else { pm.test('Falha ao criar slot (atendente)', () => pm.expect.fail(pm.response.code)); }"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenAtendente}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"doctorId\": {{medicoId}},\n  \"startsAt\": \"2025-09-10T15:00:00.000Z\",\n  \"endsAt\": \"2025-09-10T16:00:00.000Z\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/availability",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"availability"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar slots (público) por médico/período",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"  const arr = pm.response.json();",
+									"  if (Array.isArray(arr) && arr.length > 0) {",
+									"    pm.collectionVariables.set('slotId', arr[0].id);",
+									"  }",
+									"  pm.test('Slots listados', () => pm.expect(arr).to.be.an('array'));",
+									"} else { pm.test('Falha ao listar slots', () => pm.expect.fail(pm.response.code)); }"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/availability?doctorId={{medicoId}}&from={{de}}&to={{ate}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"availability"
+							],
+							"query": [
+								{
+									"key": "doctorId",
+									"value": "{{medicoId}}"
+								},
+								{
+									"key": "from",
+									"value": "{{de}}"
+								},
+								{
+									"key": "to",
+									"value": "{{ate}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Consultas (agendar/confirmar/finalizar)",
+			"item": [
+				{
+					"name": "Agendar consulta — PACIENTE (para si) [status = PENDING]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"  const a = pm.response.json();",
+									"  pm.collectionVariables.set('consultaId', a.id);",
+									"  pm.test('Consulta criada (PENDING) e salva em {{consultaId}}', () => pm.expect(a.status).to.eql('PENDING'));",
+									"} else { pm.test('Falha ao agendar (paciente)', () => pm.expect.fail(pm.response.code)); }"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenPaciente}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"slotId\": {{slotId}},\n  \"notes\": \"Dor de cabeça\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/appointments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"appointments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Agendar consulta — ATENDENTE (para um paciente) [status = PENDING]",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"  const a = pm.response.json();",
+									"  pm.collectionVariables.set('consultaId', a.id);",
+									"  pm.test('Consulta (atendente) criada (PENDING)', () => pm.expect(a.status).to.eql('PENDING'));",
+									"} else { pm.test('Falha ao agendar (atendente)', () => pm.expect.fail(pm.response.code)); }"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenAtendente}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"slotId\": {{slotId}},\n  \"patientId\": {{pacienteId}},\n  \"notes\": \"Agendado pela recepção\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/appointments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"appointments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Minha agenda — PACIENTE",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenPaciente}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/appointments/my",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"appointments",
+								"my"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Minha agenda — MÉDICO",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenMedico}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/appointments/my",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"appointments",
+								"my"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Agenda do médico por ID — ATENDENTE",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenAtendente}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/appointments/doctor/{{medicoId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"appointments",
+								"doctor",
+								"{{medicoId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Confirmar consulta (ATENDENTE) — PENDING → CONFIRMED",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenAtendente}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"CONFIRMED\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/appointments/{{consultaId}}/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"appointments",
+								"{{consultaId}}",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancelar consulta pendente (PACIENTE) — PENDING → CANCELLED",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenPaciente}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"CANCELLED\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/appointments/{{consultaId}}/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"appointments",
+								"{{consultaId}}",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Finalizar consulta (MÉDICO) — CONFIRMED → COMPLETED",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenMedico}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"COMPLETED\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/appointments/{{consultaId}}/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"appointments",
+								"{{consultaId}}",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancelar consulta confirmada (MÉDICO) — CONFIRMED → CANCELLED",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenMedico}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"CANCELLED\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/appointments/{{consultaId}}/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"appointments",
+								"{{consultaId}}",
+								"status"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Exames (uploads e listagens)",
+			"item": [
+				{
+					"name": "Upload exame — PACIENTE (para si)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenPaciente}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "{{caminhoArquivoExame}}"
+								},
+								{
+									"key": "description",
+									"value": "{{descricaoExame}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/exams/upload",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"exams",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload exame — ATENDENTE (para paciente)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenAtendente}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "patientId",
+									"value": "{{pacienteId}}",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "{{caminhoArquivoExame}}"
+								},
+								{
+									"key": "description",
+									"value": "Enviado pela recepção",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/exams/upload",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"exams",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload exame — MÉDICO (para paciente)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenMedico}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "patientId",
+									"value": "{{pacienteId}}",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "{{caminhoArquivoExame}}"
+								},
+								{
+									"key": "description",
+									"value": "Laudo do médico",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/exams/upload",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"exams",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Meus exames — PACIENTE",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenPaciente}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/exams/my",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"exams",
+								"my"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Exames de um paciente — MÉDICO",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenMedico}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/exams/patient/{{pacienteId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"exams",
+								"patient",
+								"{{pacienteId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Exames de um paciente — ATENDENTE",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenAtendente}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/exams/patient/{{pacienteId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"exams",
+								"patient",
+								"{{pacienteId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Relatórios",
+			"item": [
+				{
+					"name": "Relatório de consultas — ATENDENTE (DETALHADO JSON)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenAtendente}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/reports/appointments?from={{repDe}}&to={{repAte}}&format=json&doctorId={{medicoId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reports",
+								"appointments"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "{{repDe}}"
+								},
+								{
+									"key": "to",
+									"value": "{{repAte}}"
+								},
+								{
+									"key": "format",
+									"value": "json"
+								},
+								{
+									"key": "doctorId",
+									"value": "{{medicoId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Relatório de consultas — MÉDICO (DETALHADO JSON)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenMedico}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/reports/appointments?from={{repDe}}&to={{repAte}}&format=json",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reports",
+								"appointments"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "{{repDe}}"
+								},
+								{
+									"key": "to",
+									"value": "{{repAte}}"
+								},
+								{
+									"key": "format",
+									"value": "json"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Relatório agregado — ADMIN (CSV, sem dados de paciente)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{tokenAdmin}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/reports/appointments?from={{repDe}}&to={{repAte}}&format=csv&doctorId={{medicoId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reports",
+								"appointments"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "{{repDe}}"
+								},
+								{
+									"key": "to",
+									"value": "{{repAte}}"
+								},
+								{
+									"key": "format",
+									"value": "csv"
+								},
+								{
+									"key": "doctorId",
+									"value": "{{medicoId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3333/api"
+		},
+		{
+			"key": "tokenAdmin",
+			"value": ""
+		},
+		{
+			"key": "tokenAtendente",
+			"value": ""
+		},
+		{
+			"key": "tokenMedico",
+			"value": ""
+		},
+		{
+			"key": "tokenPaciente",
+			"value": ""
+		},
+		{
+			"key": "pacienteId",
+			"value": ""
+		},
+		{
+			"key": "medicoId",
+			"value": ""
+		},
+		{
+			"key": "consultaId",
+			"value": ""
+		},
+		{
+			"key": "slotId",
+			"value": ""
+		},
+		{
+			"key": "q",
+			"value": ""
+		},
+		{
+			"key": "de",
+			"value": ""
+		},
+		{
+			"key": "ate",
+			"value": ""
+		},
+		{
+			"key": "repDe",
+			"value": "2025-09-01T00:00:00.000Z"
+		},
+		{
+			"key": "repAte",
+			"value": "2025-09-30T23:59:59.000Z"
+		},
+		{
+			"key": "caminhoArquivoExame",
+			"value": "C:\\\\temp\\\\exame.pdf"
+		},
+		{
+			"key": "descricaoExame",
+			"value": "Exame de sangue"
+		}
+	]
+}

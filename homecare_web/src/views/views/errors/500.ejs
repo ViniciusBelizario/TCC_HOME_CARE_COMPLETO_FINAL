@@ -1,0 +1,17 @@
+<section style="padding:24px">
+  <h1 style="margin:0 0 6px">Erro interno</h1>
+  <p style="color:#6b7a90;margin:0 0 14px">
+    Ocorreu um erro ao processar sua solicitação. Tente novamente.
+  </p>
+  <% if (process.env.NODE_ENV !== 'production' && error) { %>
+    <pre style="white-space:pre-wrap;background:#f7fafc;border:1px solid #d8e0e7;border-radius:10px;padding:12px">
+<%= (error && (error.stack || error.message)) %>
+    </pre>
+  <% } %>
+  <a href="/" class="btn" style="
+    display:inline-flex;align-items:center;gap:8px;
+    background:#1fa3b1;border:1px solid #1fa3b1;color:#fff;
+    padding:10px 14px;border-radius:10px;text-decoration:none;">
+    ← Voltar ao início
+  </a>
+</section>

@@ -1,0 +1,21 @@
+nome,crm,estado,especialidade,email,telefone,registro_tipo,gerado_em
+Marcos Oliveira,TEST-CRM-CE-437387,CE,Oncologia,marcos.oliveira.63@example.test,+55 (72) 99859-4667,TEST_ONLY,2025-11-05
+Marina Costa,TEST-CRM-AM-886164,AM,Pediatria,marina.costa.84@example.test,+55 (63) 99246-4824,TEST_ONLY,2025-11-05
+Thiago Araújo,TEST-CRM-CE-585540,CE,Gastroenterologia,thiago.araujo.24@example.test,+55 (93) 99889-7087,TEST_ONLY,2025-11-05
+Ana Rodrigues,TEST-CRM-AM-275091,AM,Oncologia,ana.rodrigues.73@example.test,+55 (78) 98318-1831,TEST_ONLY,2025-11-05
+Lucas Rodrigues,TEST-CRM-RS-465218,RS,Clínica Geral,lucas.rodrigues.39@example.test,+55 (60) 99228-2565,TEST_ONLY,2025-11-05
+Mariana Rodrigues,TEST-CRM-PA-905444,PA,Dermatologia,mariana.rodrigues.48@example.test,+55 (54) 99001-3575,TEST_ONLY,2025-11-05
+Vinícius Souza,TEST-CRM-PE-570465,PE,Cardiologia,vinicius.souza.74@example.test,+55 (59) 98553-2623,TEST_ONLY,2025-11-05
+Lucas Ribeiro,TEST-CRM-PE-566920,PE,Otorrinolaringologia,lucas.ribeiro.9@example.test,+55 (77) 98539-6925,TEST_ONLY,2025-11-05
+Guilherme Barbosa,TEST-CRM-MG-415581,MG,Dermatologia,guilherme.barbosa.15@example.test,+55 (67) 98489-6120,TEST_ONLY,2025-11-05
+Carlos Nascimento,TEST-CRM-MG-485536,MG,Ginecologia,carlos.nascimento.30@example.test,+55 (63) 98433-8442,TEST_ONLY,2025-11-05
+Ana Souza,TEST-CRM-RJ-707187,RJ,Gastroenterologia,ana.souza.67@example.test,+55 (34) 98671-7271,TEST_ONLY,2025-11-05
+Pedro Araújo,TEST-CRM-MG-769031,MG,Cardiologia,pedro.araujo.73@example.test,+55 (96) 99828-9192,TEST_ONLY,2025-11-05
+Marina Rodrigues,TEST-CRM-BA-183151,BA,Clínica Geral,marina.rodrigues.76@example.test,+55 (15) 98128-5881,TEST_ONLY,2025-11-05
+Carlos Nascimento,TEST-CRM-BA-476474,BA,Psiquiatria,carlos.nascimento.73@example.test,+55 (32) 99074-6083,TEST_ONLY,2025-11-05
+Marina Silva,TEST-CRM-BA-949040,BA,Gastroenterologia,marina.silva.61@example.test,+55 (38) 98013-5310,TEST_ONLY,2025-11-05
+Marina Santos,TEST-CRM-GO-900881,GO,Ortopedia,marina.santos.73@example.test,+55 (55) 99966-7143,TEST_ONLY,2025-11-05
+Mateus Araújo,TEST-CRM-BA-305015,BA,Ortopedia,mateus.araujo.61@example.test,+55 (50) 98093-6849,TEST_ONLY,2025-11-05
+Pedro Oliveira,TEST-CRM-GO-629086,GO,Ginecologia,pedro.oliveira.18@example.test,+55 (84) 98724-1208,TEST_ONLY,2025-11-05
+Ricardo Martins,TEST-CRM-BA-764187,BA,Gastroenterologia,ricardo.martins.32@example.test,+55 (85) 98709-6249,TEST_ONLY,2025-11-05
+Mariana Rodrigues,TEST-CRM-SP-524684,SP,Ginecologia,mariana.rodrigues.28@example.test,+55 (18) 99132-9344,TEST_ONLY,2025-11-05

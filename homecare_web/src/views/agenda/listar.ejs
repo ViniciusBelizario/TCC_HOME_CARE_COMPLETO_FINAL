@@ -1,0 +1,18 @@
+<div class="actions">
+  <a href="/agenda/cadastrar" class="btn">+ Novo agendamento</a>
+</div>
+
+<table class="table">
+  <thead>
+    <tr><th>Paciente</th><th>Profissional</th><th>Data</th></tr>
+  </thead>
+  <tbody>
+    <% itens.forEach(i => { %>
+      <tr>
+        <td><%= i.paciente %></td>
+        <td><%= i.profissional %></td>
+        <td><%= i.data %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>

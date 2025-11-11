@@ -1,0 +1,184 @@
+<%-
+// Layout principal deve incluir a sidebar e um <main id="app-main">.
+// Open Sans carregada globalmente.
+%>
+
+<section class="cadastro-page">
+  <header class="cadastro-header">
+    <h1>Cadastro</h1>
+    <p>Gerencie usuários do sistema: cadastre e consulte Médicos e Atendentes.</p>
+  </header>
+
+  <div class="cadastro-actions">
+    <button class="btn btn-primary" id="btn-open-attendant" type="button">
+      Cadastrar Atendente
+    </button>
+    <button class="btn btn-secondary" id="btn-open-doctor" type="button">
+      Cadastrar Médico
+    </button>
+  </div>
+
+  <!-- Busca unificada -->
+  <section class="search-bar">
+    <div class="search-row">
+      <label class="search-field">
+        <span>Tipo</span>
+        <select id="search-type">
+          <option value="doctors">Médicos</option>
+          <option value="attendants">Atendentes</option>
+        </select>
+      </label>
+
+      <label class="search-field">
+        <span>Buscar por</span>
+        <select id="search-by">
+          <option value="q">Nome</option>
+          <option value="cpf">CPF</option>
+        </select>
+      </label>
+
+      <label class="search-input">
+        <span>Termo</span>
+        <input id="search-term" type="search" placeholder="Digite o nome ou CPF..." />
+      </label>
+
+      <div class="search-actions">
+        <button class="btn btn-ghost" id="btn-search" type="button">Pesquisar</button>
+        <button class="btn btn-ghost" id="btn-clear" type="button" title="Limpar">Limpar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Abas -->
+  <nav class="tabs" role="tablist">
+    <button class="tab is-active" role="tab" aria-selected="true" aria-controls="tab-doctors" id="tab-btn-doctors">Médicos</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="tab-attendants" id="tab-btn-attendants">Atendentes</button>
+  </nav>
+
+  <!-- Conteúdo das abas -->
+  <section id="tab-doctors" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-btn-doctors">
+    <div class="list-header">
+      <h2>Médicos</h2>
+      <button class="btn btn-ghost" id="btn-refresh-doctors" type="button" title="Atualizar">Atualizar</button>
+    </div>
+    <div class="table-wrapper">
+      <table class="hc-table" id="doctors-table" aria-describedby="help-doctors">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>E-mail</th>
+            <th>CPF</th>
+            <th>Especialidade</th>
+            <th>CRM</th>
+            <th>Criado em</th>
+          </tr>
+        </thead>
+        <tbody><!-- preenchido via JS --></tbody>
+      </table>
+      <p id="help-doctors" class="table-help">Resultados da API /doctors.</p>
+    </div>
+  </section>
+
+  <section id="tab-attendants" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-attendants" hidden>
+    <div class="list-header">
+      <h2>Atendentes</h2>
+      <button class="btn btn-ghost" id="btn-refresh-attendants" type="button" title="Atualizar">Atualizar</button>
+    </div>
+    <div class="table-wrapper">
+      <table class="hc-table" id="attendants-table" aria-describedby="help-attendants">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>E-mail</th>
+            <th>CPF</th>
+            <th>Criado em</th>
+          </tr>
+        </thead>
+        <tbody><!-- preenchido via JS --></tbody>
+      </table>
+      <p id="help-attendants" class="table-help">Resultados da API /attendants.</p>
+    </div>
+  </section>
+
+  <!-- Modal de Cadastro -->
+  <div class="modal-overlay" id="cadastro-modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-card" role="document">
+      <div class="modal-header">
+        <h2 id="modal-title">Cadastro</h2>
+      </div>
+
+      <div class="alert" id="form-alert" hidden></div>
+
+      <!-- Form Atendente -->
+      <form id="form-attendant" class="modal-form" hidden novalidate>
+        <div class="form-grid">
+          <label>
+            <span>Nome*</span>
+            <input type="text" name="name" required />
+          </label>
+          <label>
+            <span>E-mail*</span>
+            <input type="email" name="email" required />
+          </label>
+          <label>
+            <span>CPF*</span>
+            <input type="text" name="cpf" inputmode="numeric" maxlength="14" placeholder="___.___.___-__" required />
+          </label>
+          <label>
+            <span>Senha*</span>
+            <input type="password" name="password" minlength="6" required />
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-close>Voltar</button>
+          <button type="submit" class="btn btn-primary" data-submit>
+            <span class="btn-label">Cadastrar</span>
+            <span class="btn-spinner" aria-hidden="true"></span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Form Médico -->
+      <form id="form-doctor" class="modal-form" hidden novalidate>
+        <div class="form-grid">
+          <label>
+            <span>Nome*</span>
+            <input type="text" name="name" required />
+          </label>
+          <label>
+            <span>E-mail*</span>
+            <input type="email" name="email" required />
+          </label>
+          <label>
+            <span>CPF*</span>
+            <input type="text" name="cpf" inputmode="numeric" maxlength="14" placeholder="___.___.___-__" required />
+          </label>
+          <label>
+            <span>Senha*</span>
+            <input type="password" name="password" minlength="6" required />
+          </label>
+          <label>
+            <span>Especialidade*</span>
+            <input type="text" name="specialty" required placeholder="Ex.: Clínico Geral" />
+          </label>
+          <label>
+            <span>CRM*</span>
+            <input type="text" name="crm" required placeholder="Ex.: CRM-SP-123456" />
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-close>Voltar</button>
+          <button type="submit" class="btn btn-primary" data-submit>
+            <span class="btn-label">Cadastrar</span>
+            <span class="btn-spinner" aria-hidden="true"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<link rel="stylesheet" href="/css/cadastro.css">
+<script type="module" src="/js/cadastro.js"></script>

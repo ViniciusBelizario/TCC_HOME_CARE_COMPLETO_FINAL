@@ -1,0 +1,68 @@
+<link rel="stylesheet" href="/css/medico-hoje.css">
+
+<section class="medico-hoje">
+  <header class="mh-header">
+    <div>
+      <h1>Pacientes de Hoje</h1>
+      <p class="mh-sub">Consultas do dia</p>
+    </div>
+    <div class="mh-actions">
+      <button class="btn btn-ghost" id="mh-refresh" title="Atualizar">Atualizar</button>
+    </div>
+  </header>
+
+  <!-- Abas -->
+  <nav class="mh-tabs" role="tablist">
+    <button class="mh-tab is-active" role="tab" aria-selected="true" aria-controls="mh-panel-open" id="mh-tab-open">Hoje</button>
+    <button class="mh-tab" role="tab" aria-selected="false" aria-controls="mh-panel-completed" id="mh-tab-completed">Finalizadas</button>
+  </nav>
+
+  <!-- Painel: Hoje (abertas) -->
+  <section id="mh-panel-open" class="mh-panel is-active" role="tabpanel" aria-labelledby="mh-tab-open">
+    <table class="hc-table" id="mh-table-open" aria-describedby="mh-help-open">
+      <thead>
+        <tr>
+          <th>Horário</th>
+          <th>Paciente</th>
+          <th>Telefone</th>
+          <th class="mh-col-actions">Ações</th>
+        </tr>
+      </thead>
+      <tbody><!-- preenchido via JS --></tbody>
+    </table>
+    <p id="mh-help-open" class="mh-help">Consultas do dia ainda não finalizadas.</p>
+  </section>
+
+  <!-- Painel: Finalizadas -->
+  <section id="mh-panel-completed" class="mh-panel" role="tabpanel" aria-labelledby="mh-tab-completed" hidden>
+    <table class="hc-table" id="mh-table-completed" aria-describedby="mh-help-completed">
+      <thead>
+        <tr>
+          <th>Horário</th>
+          <th>Paciente</th>
+          <th>Telefone</th>
+          <th>Status</th>
+          <th class="mh-col-actions">Ações</th>
+        </tr>
+      </thead>
+      <tbody><!-- preenchido via JS --></tbody>
+    </table>
+    <p id="mh-help-completed" class="mh-help">Consultas do dia marcadas como finalizadas.</p>
+  </section>
+</section>
+
+<!-- Modal -->
+<div class="modal-root">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-slot"></div>
+</div>
+
+<!-- Toast stack -->
+<div id="toast-stack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+  window.MEDICO = {
+    auth: <%- JSON.stringify(auth || {}) %>
+  };
+</script>
+<script src="/js/medico-hoje.js"></script>

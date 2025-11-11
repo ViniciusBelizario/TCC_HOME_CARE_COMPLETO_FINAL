@@ -1,0 +1,95 @@
+:root{
+  --surface:#ffffff; --muted:#6b7a90; --text:#1f2d3d;
+  --brand:#1fa3b1; --ok:#11a36a; --warn:#f39c12; --danger:#b3261e;
+  --border:#d8e0e7; --shadow:0 12px 32px rgba(31,163,177,.18);
+}
+
+/* Header / Tabs */
+.mh-header{display:flex;justify-content:space-between;align-items:flex-end;margin:4px 0 10px}
+.mh-header h1{margin:0;font-size:24px}
+.mh-sub{color:var(--muted);margin:4px 0 0}
+.mh-actions .btn{border:1px solid var(--border);border-radius:10px;padding:8px 12px}
+
+.mh-tabs{display:flex;gap:8px;border-bottom:1px solid rgba(0,0,0,.06);margin:10px 0}
+.mh-tab{background:#fff;border:1px solid var(--border);border-bottom:0;padding:10px 14px;border-radius:10px 10px 0 0;color:#334}
+.mh-tab.is-active{font-weight:700;box-shadow:0 -2px 8px rgba(0,0,0,.05)}
+
+.mh-panel{display:none}
+.mh-panel.is-active{display:block}
+.mh-help{color:var(--muted);font-size:12px;margin:8px 2px 0}
+
+/* Tabela */
+.hc-table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+.hc-table thead th{font-size:13px;color:var(--muted);padding:10px 12px;border-bottom:1px solid rgba(0,0,0,.06);text-align:left}
+.hc-table tbody td{padding:10px 12px;border-bottom:1px solid rgba(0,0,0,.04);font-size:14px}
+.hc-table tbody tr:hover{background:#f7fafc}
+.mh-col-actions{width:240px}
+
+/* Botões base */
+.btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--brand);background:var(--brand);color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn-ghost{background:#fff;border:1px solid var(--border);color:#223}
+.btn-sm{padding:6px 10px;border-radius:8px}
+.btn-pastel{background:#eaf1fb;border:1px solid var(--border);color:#1f2d3d}
+.btn-green{background:var(--ok);border-color:var(--ok)}
+.btn-danger{background:#fdecea;color:#b3261e;border:1px solid #f5c7c3}
+
+/* Modal */
+.modal-root{position:fixed;inset:0;z-index:40;display:none}
+.modal-root.is-open{display:block}
+.modal-backdrop{position:absolute;inset:0;background:rgba(15,25,35,.35);backdrop-filter:blur(3px)}
+.modal{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
+.modal__card{width:min(880px,96vw);background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,.12);padding:18px}
+.modal__title{margin:0 0 10px;font-size:18px;font-weight:800;color:#0f1e33;text-align:left}
+.modal__footer{margin-top:12px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.detail-grid{display:grid;grid-template-columns:120px 1fr;gap:8px}
+.detail-grid .label{color:#516175;font-weight:600}
+.detail-grid .value{color:#12233b}
+
+/* Lista de exames no modal */
+.exams{margin-top:10px;border-top:1px dashed var(--border);padding-top:10px}
+.exams h3{margin:0 0 6px;font-size:14px;color:#3a4b5c}
+.exam-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px;border:1px solid var(--border);border-radius:10px;background:#fff}
+.exam-actions{display:flex;gap:8px}
+.link-btn{background:transparent;border:0;color:#1f2d3d;text-decoration:underline;cursor:pointer;padding:0}
+
+/* Inline viewer (abre dentro do mesmo modal) */
+.inline-viewer{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  padding:16px; background:rgba(10,20,30,.55); backdrop-filter:blur(2px);
+  border-radius:16px;
+}
+.inline-viewer__card{
+  width:min(960px, 95vw); height:min(80vh, 820px);
+  background:#fff; border-radius:14px; box-shadow:0 16px 36px rgba(0,0,0,.25);
+  display:flex; flex-direction:column; overflow:hidden; border:1px solid var(--border);
+}
+.inline-viewer__top{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:10px 12px; border-bottom:1px solid var(--border); background:#f7fafc;
+}
+.inline-viewer__title{font-weight:700}
+.inline-viewer__actions{display:flex; gap:8px}
+.inline-viewer__frame, .inline-viewer__img{
+  width:100%; height:100%; border:0; object-fit:contain; background:#111;
+}
+.inline-viewer__close{
+  background:#fff; border:1px solid var(--border); border-radius:8px; padding:6px 10px; cursor:pointer;
+}
+
+/* Toast */
+.toast-stack{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:99}
+.toast{background:#1f2d3d;color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.2);font-size:14px}
+.toast.err{background:#b3261e}
+
+
+.mh-exam-modal{ display:flex; flex-direction:column; height:70vh; }
+.mh-exam-toolbar{
+  display:flex; justify-content:space-between; align-items:center;
+  gap:12px; padding:8px 0; border-bottom:1px solid rgba(0,0,0,.06);
+}
+.mh-exam-title{ font-weight:700; }
+.mh-exam-actions{ display:flex; gap:8px; }
+.mh-exam-body{ flex:1; min-height:0; }
+.mh-exam-frame{ width:100%; height:100%; border:0; border-radius:8px; background:#fff; }
+.link-as-button{ background:none; border:0; color:#1f6fd1; cursor:pointer; padding:0; }
+.link-as-button:hover{ text-decoration:underline; }

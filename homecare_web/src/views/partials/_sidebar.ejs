@@ -1,0 +1,78 @@
+<!-- src/views/partials/_sidebar.ejs -->
+<%
+const r = (typeof auth?.role === 'string' ? auth.role : '').toLowerCase();
+const isAdmin = !!auth?.isAdmin;
+const isAtendente = !!auth?.isAtendente;
+const isMedico = !!auth?.isMedico;
+
+// Rota de Pacientes dinâmica:
+// - Médico -> Pacientes de Hoje
+// - Demais -> Pacientes padrão
+const PACIENTES_PATH = isMedico ? '/medico/pacientes-hoje' : '/pacientes';
+
+// Rota de Agenda dinâmica:
+// - Médico -> agenda exclusiva
+// - Demais -> agenda padrão
+const AGENDA_PATH = isMedico ? '/agenda-medico' : '/agenda';
+
+const ROUTES = {
+  dashboard: '/',
+  agenda: AGENDA_PATH,
+  pacientes: PACIENTES_PATH,
+  cadastro: '/cadastro',
+  relatorio: '/relatorio',
+  perfil: '/perfil',
+};
+%>
+
+<aside id="sidebar" class="sidebar">
+  <div class="sidebar__top">
+    <a href="<%= ROUTES.dashboard %>" class="brand" aria-label="Página inicial">
+      <img src="/img/logo.png" alt="Connect Health" class="brand-logo--lg" />
+    </a>
+  </div>
+
+  <nav class="menu">
+    <a class="menu__item" href="<%= ROUTES.dashboard %>" data-collapse-on-click title="Home">
+      <span class="menu__icon">🏠</span>
+      <span class="menu__text">Home</span>
+      <span class="menu__rail">Home</span>
+    </a>
+
+    <% if (isAtendente || isMedico) { %>
+      <a class="menu__item" href="<%= ROUTES.agenda %>" data-collapse-on-click title="Agenda">
+        <span class="menu__icon">🗓️</span>
+        <span class="menu__text">Agenda</span>
+        <span class="menu__rail">Agenda</span>
+      </a>
+
+      <a class="menu__item" href="<%= ROUTES.pacientes %>" data-collapse-on-click title="Pacientes">
+        <span class="menu__icon">👥</span>
+        <span class="menu__text"><%= isMedico ? 'Pacientes de Hoje' : 'Pacientes' %></span>
+        <span class="menu__rail"><%= isMedico ? 'Pacientes de Hoje' : 'Pacientes' %></span>
+      </a>
+    <% } %>
+
+    <% if (isAdmin) { %>
+      <a class="menu__item" href="<%= ROUTES.cadastro %>" data-collapse-on-click title="Cadastro">
+        <span class="menu__icon">🧩</span>
+        <span class="menu__text">Cadastro</span>
+        <span class="menu__rail">Cadastro</span>
+      </a>
+
+      <a class="menu__item" href="<%= ROUTES.relatorio %>" data-collapse-on-click title="Relatórios">
+        <span class="menu__icon">📊</span>
+        <span class="menu__text">Relatórios</span>
+        <span class="menu__rail">Relatórios</span>
+      </a>
+    <% } %>
+
+    <hr class="menu__sep">
+
+    <a class="menu__item" href="<%= ROUTES.perfil %>" title="Perfil">
+      <span class="menu__icon">⚙️</span>
+      <span class="menu__text">Perfil</span>
+      <span class="menu__rail">Perfil</span>
+    </a>
+  </nav>
+</aside>

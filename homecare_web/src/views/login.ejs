@@ -1,0 +1,34 @@
+<!-- src/views/login.ejs -->
+<section class="auth-card">
+  <div class="auth-logo">
+    <img src="/img/logo.png" alt="Connect Health" class="auth-logo__img">
+  </div>
+
+  <h1 class="auth-title">Acesso ao sistema</h1>
+
+  <% if (typeof msg !== 'undefined' && msg) { %>
+    <div class="auth-alert" style="background:#e8f5e9;border:1px solid #b7dfb9;color:#1b5e20;"><%= msg %></div>
+  <% } %>
+
+  <% if (typeof erro !== 'undefined' && erro) { %>
+    <div class="auth-alert"><%= erro %></div>
+  <% } %>
+
+  <form method="post" action="/login" class="auth-form">
+    <label class="auth-field">
+      <span>E-mail</span>
+      <input type="email" name="email" autocomplete="username" required value="admin@tcc.com">
+    </label>
+
+    <label class="auth-field auth-field--password">
+      <span>Senha</span>
+      <div class="auth-password">
+        <input type="password" id="password" name="password" autocomplete="current-password" required value="admin123">
+        <button type="button" class="auth-show" aria-label="Mostrar/ocultar senha"
+          onclick="(function(btn){ const i=document.getElementById('password'); const is=i.type==='password'; i.type=is?'text':'password'; btn.innerText=is?'Ocultar':'Mostrar'; })(this)">Mostrar</button>
+      </div>
+    </label>
+
+    <button class="btn auth-submit" type="submit">Entrar</button>
+  </form>
+</section>

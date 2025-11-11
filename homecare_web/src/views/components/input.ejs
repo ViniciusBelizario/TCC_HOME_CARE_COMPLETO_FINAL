@@ -1,0 +1,5 @@
+<% const t = type || 'text'; %>
+<label class="input">
+  <span><%= label %></span>
+  <input type="<%= t %>" name="<%= name %>" value="<%= value || '' %>" <%= required ? 'required' : '' %> />
+</label>

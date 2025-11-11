@@ -1,0 +1,12 @@
+<!--src\views\partials\_header.ejs-->
+<header class="header">
+  <div class="header__left"></div>
+  <div class="header__right">
+    <% if (user) { %>
+      <span class="user-name"><%= user.name %></span>
+      <form method="post" action="/logout" class="inline">
+        <button class="btn btn--sm btn--ghost" type="submit">Sair</button>
+      </form>
+    <% } %>
+  </div>
+</header>

@@ -1,0 +1,152 @@
+/*public\css\login.css*/
+/* ============================================================
+   login.css - Connect Health (Auth)
+   ============================================================ */
+
+/* --- Reset essencial para não estourar larguras --- */
+*, *::before, *::after { box-sizing: border-box; }
+
+:root{
+  --border: #d8e0e7;
+  --accent: #4c7fd1;
+  --bg: #f7fafc;
+  --text: #1f2d3d;
+}
+
+.auth-page{
+  margin:0;
+  min-height:100vh;
+  background: var(--bg);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font:14px/1.45 "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color:var(--text);
+}
+
+.auth-main{
+  width:100%;
+  max-width: 440px;                /* leve ajuste para caber bem */
+  padding: 20px;
+}
+
+.auth-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px 22px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.05);
+}
+
+.auth-logo{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:12px;
+}
+
+.auth-logo__img{
+  width: 200px;
+  height:auto;
+  object-fit:contain;
+}
+
+.auth-title{
+  margin:6px 0 14px;
+  font-size: 20px;
+  font-weight: 700;
+  text-align:center;
+  color:#12233b;
+}
+
+.auth-alert{
+  background:#fdecec;
+  border:1px solid #f2caca;
+  color:#842e2e;
+  padding:10px 12px;
+  border-radius:10px;
+  margin-bottom:10px;
+}
+
+.auth-form{
+  display:grid;
+  gap:12px;
+  width:100%;
+}
+
+.auth-field > span{
+  display:block;
+  margin-bottom:6px;
+  color:#3a4b5c;
+  font-weight:600;
+}
+
+.auth-field input{
+  display:block;
+  width:100%;
+  max-width:100%;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:#fff;
+  outline:none;
+}
+
+.auth-field input:focus{
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(76,127,209,.15);
+}
+
+/* Linha de senha com botão “Mostrar” alinhado */
+.auth-field--password .auth-password{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  width:100%;
+}
+
+.auth-field--password .auth-password input{
+  flex:1 1 auto;
+  min-width:0;                    /* evita estourar em navegadores antigos */
+}
+
+.auth-show{
+  border:1px solid var(--border);
+  background:#fff;
+  border-radius:10px;
+  padding:10px 12px;
+  cursor:pointer;
+  white-space:nowrap;
+  height:42px;                    /* casa com a altura do input */
+  line-height:1;
+}
+
+.auth-show:hover{
+  background:#f3f6fa;
+}
+
+/* Botão de enviar */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid var(--accent);
+  background: var(--accent);
+  color:#fff;
+  padding:10px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  width:100%;
+  font-weight:700;
+}
+
+.auth-submit{
+  margin-top:4px;
+}
+
+/* Responsivo */
+@media (max-width: 420px){
+  .auth-main{ padding:12px }
+  .auth-card{ padding:20px 16px }
+  .auth-logo__img{ width: 180px }
+}

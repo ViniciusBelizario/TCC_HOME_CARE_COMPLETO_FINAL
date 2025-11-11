@@ -1,0 +1,14 @@
+<table class="table">
+  <thead>
+    <tr>
+      <% headers.forEach(h => { %><th><%= h %></th><% }) %>
+    </tr>
+  </thead>
+  <tbody>
+    <% rows.forEach(r => { %>
+      <tr>
+        <% r.forEach(c => { %><td><%- c %></td><% }) %>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
