@@ -19,4 +19,7 @@ router.post('/availability', AgendaCtrl.createAvailability);
 // Disponibilizar horários em lote (dia)
 router.post('/availability/day-openings', AgendaCtrl.createDayOpenings);
 
+// EXCLUIR horário disponível (vaga)
+router.delete('/availability/:id', AgendaCtrl.deleteAvailability);
+
 export default router;

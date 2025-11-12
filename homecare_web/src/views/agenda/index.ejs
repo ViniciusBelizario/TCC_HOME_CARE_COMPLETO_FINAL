@@ -110,8 +110,10 @@
   </div>
 </script>
 
+<!-- Pilha de toasts padrão do sistema -->
+<div id="toast-stack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
 <script>
-  // Médicos vindos do controller (já no formato correto)
   window.AGENDA_MEDICOS = <%- JSON.stringify(medicos || []) %>;
 </script>
 <script src="/js/agenda.js"></script>

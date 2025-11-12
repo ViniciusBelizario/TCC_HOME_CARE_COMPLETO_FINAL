@@ -28,16 +28,69 @@
   }
   const $modalSlot = $modalRoot.querySelector('.modal-slot');
 
+  // ======= TOAST PADRÃO DO SISTEMA =======
+  function ensureToastStack(){
+    let stack = document.getElementById('toast-stack');
+    if (!stack) {
+      stack = document.createElement('div');
+      stack.id = 'toast-stack';
+      stack.className = 'toast-stack';
+      stack.setAttribute('aria-live','polite');
+      stack.setAttribute('aria-atomic','true');
+      document.body.appendChild(stack);
+    }
+    return stack;
+  }
+  function toast(msg, isErr=false){
+    const stack = ensureToastStack();
+    const el = document.createElement('div');
+    el.className = 'toast' + (isErr ? ' err' : '');
+    el.textContent = msg;
+    stack.appendChild(el);
+    setTimeout(()=>{ el.remove(); }, 3000);
+  }
+  // =======================================
+
+  // ======= CONFIRM CUSTOM (SEM ALERTA DO NAVEGADOR) =======
+  function closeModal(){
+    $modalRoot.classList.remove('is-open');
+    $modalSlot.innerHTML = '';
+    document.removeEventListener('keydown', escHandler);
+  }
+  function escHandler(e){
+    if (e.key === 'Escape') closeModal();
+  }
+  function confirmDialog(message){
+    return new Promise(resolve=>{
+      $modalSlot.innerHTML = `
+        <div class="modal">
+          <div class="modal__card" style="max-width:420px">
+            <h2 class="modal__title">Confirmar ação</h2>
+            <div style="margin:6px 0 2px; color:#12233b">${message}</div>
+            <div class="modal__footer">
+              <button type="button" class="btn btn--ghost" data-cancel>Cancelar</button>
+              <button type="button" class="btn btn--danger" data-ok>Excluir</button>
+            </div>
+          </div>
+        </div>
+      `;
+      $modalRoot.classList.add('is-open');
+      $modalRoot.querySelector('.modal-backdrop').addEventListener('click', ()=>{ closeModal(); resolve(false); });
+      $modalRoot.querySelector('[data-cancel]').addEventListener('click', ()=>{ closeModal(); resolve(false); });
+      $modalRoot.querySelector('[data-ok]').addEventListener('click', ()=>{ closeModal(); resolve(true); });
+      document.addEventListener('keydown', escHandler);
+    });
+  }
+  // =======================================
+
   const medicos = (window.AGENDA_MEDICOS || []);
   let viewYear, viewMonth;
   let selectedDate = new Date();
 
-  // Estado carregado da API
   let doctorId = medicos[0]?.id || null;
   let availability = [];
   let appointments = [];
 
-  // Index para lookup rápido nos botões Detalhe/Confirmar
   const indexAvail = new Map();
   const indexAppt  = new Map();
 
@@ -49,11 +102,8 @@
     const d = new Date(iso);
     return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
   }
-  function formatRangeUTC(startsAt, endsAt){
-    return `${toUtcHM(startsAt)} – ${toUtcHM(endsAt)}`;
-  }
 
-  // ===== seletor de médico no topo
+  // ===== seletor de médico
   injectDoctorSelect();
   function injectDoctorSelect(){
     const actions = document.querySelector('.agenda-actions');
@@ -70,7 +120,6 @@
     select.value = doctorId || medicos[0].id;
 
     select.addEventListener('change', async () => {
-      // ★ garante número
       doctorId = Number.parseInt(select.value, 10);
       await loadMonthData();
       renderMonth(viewYear, viewMonth);
@@ -82,7 +131,7 @@
   }
 
   async function loadMonthData(){
-    if (!doctorId) return;
+    if (!doctorId) { availability = []; appointments = []; indexAvail.clear(); indexAppt.clear(); return; }
 
     const first = new Date(viewYear, viewMonth, 1);
     const last = new Date(viewYear, viewMonth + 1, 0, 23, 59, 59, 999);
@@ -90,10 +139,9 @@
     const from = first.toISOString();
     const to = last.toISOString();
 
-    // ★ envia como string no QS, mas doctorId está consistente como número
     const qs = new URLSearchParams({ doctorId: String(doctorId), from, to }).toString();
     const r = await fetch(`/agenda/data?${qs}`);
-    if (!r.ok) { availability = []; appointments = []; return; }
+    if (!r.ok) { availability = []; appointments = []; indexAvail.clear(); indexAppt.clear(); return; }
     const data = await r.json();
     availability = Array.isArray(data.availability) ? data.availability : [];
     appointments = Array.isArray(data.appointments) ? data.appointments : [];
@@ -189,6 +237,7 @@
             <div class="actions">
               <button class="btn btn--sm btn-detail">Detalhe</button>
               ${type==='PENDING' ? '<button class="btn btn--sm btn--pastel btn-confirm" style="margin-left:8px">Confirmar</button>' : ''}
+              ${type==='AVAILABLE' ? '<button class="btn btn--sm btn--danger btn-del" style="margin-left:8px">Excluir</button>' : ''}
             </div>
           </li>
         `;
@@ -200,7 +249,7 @@
     renderList(disp, $listaDisp, 'info');
   }
 
-  document.addEventListener('click', (e) => {
+  document.addEventListener('click', async (e) => {
     const itemEl = e.target.closest('.appt-item');
     if (!itemEl) return;
 
@@ -209,9 +258,31 @@
 
     if (e.target.classList.contains('btn-detail')) {
       openDetail(type, id);
+      return;
     }
     if (e.target.classList.contains('btn-confirm')) {
       confirmPending(id, e.target);
+      return;
+    }
+    if (e.target.classList.contains('btn-del') && type === 'AVAILABLE') {
+      // *** confirmação custom ***
+      const yes = await confirmDialog('Excluir este horário disponível?');
+      if (!yes) return;
+      try {
+        e.target.disabled = true;
+        e.target.textContent = 'Excluindo...';
+        const r = await fetch(`/agenda/availability/${id}`, { method: 'DELETE', headers:{ 'Accept':'application/json' }});
+        if (!r.ok) { throw new Error('delete_failed'); }
+        await onMonthChange(new Date(viewYear, viewMonth, 1));
+        toast('Horário excluído.');
+      } catch (err) {
+        console.error(err);
+        toast('Não foi possível excluir o horário.', true);
+      } finally {
+        e.target.disabled = false;
+        e.target.textContent = 'Excluir';
+      }
+      return;
     }
   });
 
@@ -261,7 +332,18 @@
       `;
     }
 
-    showCustomModal(title, html);
+    // abrir modal de detalhe
+    $modalSlot.innerHTML = `
+      <div class="modal">
+        <div class="modal__card">
+          <h2 class="modal__title">${title}</h2>
+          ${html}
+        </div>
+      </div>
+    `;
+    $modalRoot.classList.add('is-open');
+    $modalRoot.querySelector('.modal-backdrop').addEventListener('click', closeModal);
+    $modalRoot.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', closeModal));
 
     const btn = document.querySelector('[data-confirm-appt]');
     if (btn) {
@@ -272,37 +354,17 @@
     }
   }
 
-  function showCustomModal(title, innerHtml){
-    $modalSlot.innerHTML = `
-      <div class="modal">
-        <div class="modal__card">
-          <h2 class="modal__title">${title}</h2>
-          ${innerHtml}
-        </div>
-      </div>
-    `;
-    $modalRoot.classList.add('is-open');
-    $modalRoot.querySelector('.modal-backdrop').addEventListener('click', closeModal);
-    $modalRoot.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', closeModal));
-  }
-
-  function closeModal(){
-    $modalRoot.classList.remove('is-open');
-    $modalSlot.innerHTML = '';
-  }
-
   // ====== DISPONIBILIZAR AGENDA ======
-
   function toggleMenu(show){ $menuDisp.setAttribute('aria-hidden', show ? 'false' : 'true'); }
   toggleMenu(false);
-  $btnDisp.addEventListener('click', (e) => {
+  $btnDisp?.addEventListener('click', (e) => {
     e.stopPropagation();
     const isHidden = $menuDisp.getAttribute('aria-hidden') !== 'false';
     toggleMenu(isHidden);
   });
   document.addEventListener('click', () => toggleMenu(false));
 
-  $menuDisp.addEventListener('click', (e) => {
+  $menuDisp?.addEventListener('click', (e) => {
     const el = e.target.closest('.dropdown__item');
     if (!el) return;
     const action = el.dataset.action;
@@ -332,15 +394,9 @@
       const inicio = fd.get('inicio');
       const fim    = fd.get('fim');
 
-      const dateKey = toKey(selectedDate); // YYYY-MM-DD
-      // ★ monta payload e só inclui doctorId se válido
-      const payload = {
-        startsAt: `${dateKey}T${inicio}:00.000Z`,
-        endsAt:   `${dateKey}T${fim}:00.000Z`
-      };
-      if (Number.isInteger(doctorId) && doctorId > 0) {
-        payload.doctorId = doctorId;
-      }
+      const dateKey = toKey(selectedDate);
+      const payload = { startsAt: `${dateKey}T${inicio}:00.000Z`, endsAt: `${dateKey}T${fim}:00.000Z` };
+      if (Number.isInteger(doctorId) && doctorId > 0) payload.doctorId = doctorId;
 
       try {
         await fetchJson('/agenda/availability', 'POST', payload);
@@ -376,18 +432,9 @@
       const fimDia    = fd.get('fimDia');
       const intervalo = Number(fd.get('intervalo'));
 
-      const dateKey = toKey(selectedDate); // YYYY-MM-DD
-
-      // ★ idem: inclui doctorId só se válido
-      const payload = {
-        date: dateKey,
-        startTime: inicioDia,
-        endTime: fimDia,
-        durationMin: intervalo
-      };
-      if (Number.isInteger(doctorId) && doctorId > 0) {
-        payload.doctorId = doctorId;
-      }
+      const dateKey = toKey(selectedDate);
+      const payload = { date: dateKey, startTime: inicioDia, endTime: fimDia, durationMin: intervalo };
+      if (Number.isInteger(doctorId) && doctorId > 0) payload.doctorId = doctorId;
 
       try {
         const resp = await fetchJson('/agenda/availability/day-openings', 'POST', payload);
@@ -418,10 +465,7 @@
 
   async function confirmPending(id, btn){
     try {
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'Confirmando...';
-      }
+      if (btn) { btn.disabled = true; btn.textContent = 'Confirmando...'; }
       await fetch(`/agenda/appointments/${id}/confirm`, {
         method: 'POST',
         headers: { 'Accept': 'application/json' }
@@ -437,25 +481,7 @@
     }
   }
 
-  function toast(msg, isErr=false){
-    let el = document.querySelector('.toast');
-    if (!el){
-      el = document.createElement('div');
-      el.className = 'toast';
-      Object.assign(el.style, {
-        position:'fixed', bottom:'16px', left:'50%', transform:'translateX(-50%)',
-        background:'#1f2d3d', color:'#fff', padding:'10px 14px', borderRadius:'10px',
-        zIndex:'9999', boxShadow:'0 6px 18px rgba(0,0,0,.2)', fontSize:'14px'
-      });
-      document.body.appendChild(el);
-    }
-    el.textContent = msg;
-    el.style.background = isErr ? '#b3261e' : '#1f2d3d';
-    el.style.display = 'block';
-    clearTimeout(el._t);
-    el._t = setTimeout(()=>{ el.style.display='none'; }, 2200);
-  }
-
+  // Navegação do mês
   $prev?.addEventListener('click', async () => {
     const d = new Date(viewYear, viewMonth-1, 1);
     await onMonthChange(d);
@@ -477,6 +503,7 @@
     renderPainel(selectedDate);
   }
 
+  // Boot
   const now = new Date();
   setSelected(now);
   renderMonth(now.getFullYear(), now.getMonth());

@@ -1,11 +1,9 @@
 // src/controllers/agenda.controller.js
-import { apiGet, apiPatch, apiPost } from '../services/api.service.js';
+import { apiGet, apiPatch, apiPost, apiDelete } from '../services/api.service.js';
 
 export const calendario = async (req, res) => {
   try {
     const token = req.session?.token;
-    // /doctors é paginado => vem { items, total, ... }
-    // pede um pageSize maior pra evitar múltiplas chamadas
     const doctorsResp = await apiGet('/doctors', token, { page: 1, pageSize: 100 });
 
     const list = Array.isArray(doctorsResp)
@@ -44,7 +42,7 @@ export const getData = async (req, res) => {
     }
 
     const availability = await apiGet('/availability', token, {
-      doctorId: doctorIdNum, ...(from ? { from } : {}), ...(to ? { to } : {})
+      doctorId: doctorIdNum, ...(from ? { from } : {}), ...(to ? { to } : {}),
     });
 
     const appointments = await apiGet(`/appointments/doctor/${doctorIdNum}`, token, { from, to });
@@ -121,5 +119,22 @@ export const createDayOpenings = async (req, res) => {
   } catch (e) {
     console.error('createDayOpenings error:', e);
     res.status(500).json({ error: 'day_openings_error' });
+  }
+};
+
+// DELETE /agenda/availability/:id -> apagar horário vago
+export const deleteAvailability = async (req, res) => {
+  try {
+    const token = req.session?.token;
+    if (!token) return res.status(401).json({ error: 'unauthorized' });
+
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ error: 'id obrigatório' });
+
+    const data = await apiDelete(`/availability/${id}`, token);
+    res.json(data ?? { ok: true });
+  } catch (e) {
+    console.error('deleteAvailability error:', e);
+    res.status(500).json({ error: 'delete_availability_error' });
   }
 };

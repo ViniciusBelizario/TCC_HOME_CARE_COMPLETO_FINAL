@@ -47,3 +47,17 @@ export async function apiPost(path, token, body, query) {
 export async function apiPatch(path, token, body, query) {
   return doRequest('PATCH', path, token, body, query);
 }
+
+export async function apiDelete(path, token) {
+  const url = (process.env.API_BASE_URL || 'http://localhost:3333/api') + path;
+  const r = await fetch(url, {
+    method: 'DELETE',
+    headers: { 'Accept':'application/json', 'Authorization': `Bearer ${token}` }
+  });
+  if (!r.ok) {
+    let err = 'delete_failed';
+    try { const j = await r.json(); err = j?.error || err; } catch {}
+    throw new Error(err);
+  }
+  try { return await r.json(); } catch { return null; }
+}
