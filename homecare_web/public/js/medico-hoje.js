@@ -151,7 +151,6 @@
       ? `<div style="margin:-6px 0 6px 0;color:#6b7a90;font-size:13px">Consulta finalizada — observações somente para leitura.</div>`
       : '';
 
-    // seção EXAMES (sempre leitura)
     const examsSection = `
       <section class="exams">
         <h3>Exames</h3>
@@ -169,14 +168,11 @@
           <div class="row"><div class="label">Atualizado</div><div class="value">${patient?.updatedAt ? fmtDateTime(patient.updatedAt) : '—'}</div></div>
         </div>
         ${statusBadge}
-
         <div class="obs-grid">
           ${listObservacoes}
           ${formObservacao}
         </div>
-
         ${examsSection}
-
         <div class="modal__footer">
           <button class="btn btn-ghost" data-close>Fechar</button>
         </div>
@@ -242,9 +238,8 @@
         let msg = 'Falha ao carregar exames.'; try{ const j=await r.json(); if (j?.error) msg += ` (${j.error})`; }catch{}
         throw new Error(msg);
       }
-      /** @type {Array} */
       const items = await r.json();
-      renderExams(items || []);
+      renderExams(Array.isArray(items)? items : []);
     }catch(e){
       console.error(e);
       if (list) list.innerHTML = `<div class="exams-empty" style="color:#b3261e">Falha ao carregar exames.</div>`;
@@ -260,7 +255,7 @@
       return;
     }
     list.innerHTML = items.map(ex => `
-      <div class="exam-item" data-exam-id="${ex.id}">
+      <div class="exam-item" data-exam-id="${ex.id}" data-exam-mime="${esc(ex.mimeType||'')}" data-exam-fn="${esc(ex.filename||'')}">
         <div class="exam-info">
           <div class="exam-name">${esc(ex.filename || `Exame #${ex.id}`)}</div>
           <div class="exam-meta">${esc(ex.mimeType || 'arquivo')} • ${fmtDateTime(ex.createdAt)}</div>
@@ -273,8 +268,17 @@
     `).join('');
   }
 
-  function openExamInline(examId){
-    // overlay simples dentro do modal
+  // Detecta tipo esperado por mime ou extensão
+  function guessType(mime, filename){
+    const m = (mime||'').toLowerCase();
+    if (m.startsWith('image/')) return 'image';
+    if (m === 'application/pdf' || /\.pdf$/i.test(filename||'')) return 'pdf';
+    if (/\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(filename||'')) return 'image';
+    return 'other';
+  }
+
+  async function openExamInline(examId, expectedMime, filename){
+    // overlay
     const root = document.querySelector('.modal-slot .modal__card');
     if (!root) return;
     const wrap = document.createElement('div');
@@ -282,23 +286,57 @@
     wrap.innerHTML = `
       <div class="inline-viewer__card">
         <div class="inline-viewer__top">
-          <div class="inline-viewer__title">Visualização do exame #${examId}</div>
+          <div class="inline-viewer__title">Exame #${examId}</div>
           <div class="inline-viewer__actions">
             <a class="btn btn-sm btn-primary" href="/medico/exames/${examId}/download">Baixar</a>
             <button class="inline-viewer__close">Fechar</button>
           </div>
         </div>
-        <div class="inline-viewer__body" style="flex:1;min-height:0">
-          <iframe class="inline-viewer__frame" src="/medico/exames/${examId}/view" title="Exame"></iframe>
+        <div class="inline-viewer__body" style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center">
+          <div class="exams-empty">Carregando visualização...</div>
         </div>
       </div>
     `;
     root.appendChild(wrap);
     wrap.querySelector('.inline-viewer__close').addEventListener('click', ()=> wrap.remove());
+
+    try{
+      const r = await fetch(`/medico/exames/${examId}/view`);
+      if (!r.ok) throw new Error('Falha ao carregar exame.');
+      const blob = await r.blob();
+      const realMime = blob.type || expectedMime || 'application/octet-stream';
+      const type = guessType(realMime, filename);
+      const url = URL.createObjectURL(blob);
+
+      const body = wrap.querySelector('.inline-viewer__body');
+      if (type === 'image'){
+        body.innerHTML = `<img class="inline-viewer__img" alt="${esc(filename||'Imagem do exame')}" />`;
+        body.querySelector('img').src = url;
+      } else if (type === 'pdf'){
+        body.innerHTML = `<iframe class="inline-viewer__frame" title="Exame PDF"></iframe>`;
+        body.querySelector('iframe').src = url;
+      } else {
+        body.innerHTML = `
+          <div class="exams-empty" style="text-align:center">
+            Não foi possível exibir inline este arquivo (<code>${esc(realMime||'desconhecido')}</code>).
+            <div style="margin-top:10px">
+              <a class="btn btn-sm btn-primary" href="/medico/exames/${examId}/download">Baixar</a>
+            </div>
+          </div>`;
+      }
+    }catch(e){
+      console.error(e);
+      toast('Falha ao visualizar o exame.', true);
+      const body = wrap.querySelector('.inline-viewer__body');
+      if (body) {
+        body.innerHTML = `<div class="exams-empty" style="color:#b3261e">Falha ao visualizar. Tente baixar o arquivo.</div>`;
+      }
+    }
   }
 
   // eventos
   document.addEventListener('click', async (ev)=>{
+    // clique nos itens da tabela
     const tr = ev.target.closest('tr[data-id]');
     if (tr) {
       const apptId = tr.getAttribute('data-id');
@@ -387,13 +425,15 @@
         // Exames
         await loadExams(patient.id);
 
-        // Delegação para visualizar exame inline
+        // Delegação: visualizar exame (usa fetch + blob, independe do header)
         document.querySelector('.modal-slot')?.addEventListener('click', (e)=>{
           const btn = e.target.closest('[data-exam-view]');
           if (!btn) return;
           const card = btn.closest('.exam-item');
           const examId = card?.getAttribute('data-exam-id');
-          if (examId) openExamInline(examId);
+          const mime = card?.getAttribute('data-exam-mime') || '';
+          const fn = card?.getAttribute('data-exam-fn') || '';
+          if (examId) openExamInline(examId, mime, fn);
         }, { once:false });
 
         return;
