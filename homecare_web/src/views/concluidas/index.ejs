@@ -1,0 +1,32 @@
+<link rel="stylesheet" href="/css/concluidas.css">
+
+<section class="cc-wrap">
+  <header class="cc-head">
+    <div>
+      <h1>Consultas concluídas</h1>
+      <p class="muted">Histórico de atendimentos finalizados</p>
+    </div>
+    <div class="cc-actions">
+      <div class="cc-search">
+        <input id="cc-q" class="input" placeholder="Buscar por nome ou CPF do paciente" />
+        <button id="cc-search-btn" class="btn btn--ghost btn--sm">Buscar</button>
+        <button id="cc-clear-btn" class="btn btn--ghost btn--sm">Limpar</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="cc-list" id="cc-list"></div>
+
+  <p id="cc-empty" class="muted" style="display:none">Nenhuma consulta concluída encontrada.</p>
+</section>
+
+<!-- Modal (reaproveita mesmo container global usado no projeto) -->
+<div class="modal-root">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-slot"></div>
+</div>
+
+<!-- Toast stack padrão -->
+<div id="toast-stack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+<script src="/js/concluidas.js"></script>

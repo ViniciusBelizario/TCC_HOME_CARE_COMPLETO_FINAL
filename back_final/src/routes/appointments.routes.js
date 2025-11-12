@@ -79,6 +79,63 @@ async function getLatestObservationMap(patientIds) {
 }
 
 /**
+ * Busca TODAS as observações que possam cair no intervalo de alguma consulta COMPLETED,
+ * agrupando por consulta. Inclui doutor {id, name, email} como na sua rota de observações.
+ * Retorna Map<appointmentId, Array<{ note, createdAt, doctor }>>
+ *
+ * Obs: só é chamada quando o chamador tem direito de ver observações (PACIENTE self ou MEDICO).
+ */
+async function getObservationsInAppointmentWindows(appointments) {
+  const byPatient = new Map(); // patientId => { minStart, maxEnd }
+  const apptIndex = new Map(); // appointmentId => { patientId, startsAt, endsAt }
+
+  for (const a of appointments) {
+    const startsAt = new Date(a.startsAt);
+    const endsAt = a.endsAt ? new Date(a.endsAt) : new Date(a.startsAt);
+    apptIndex.set(a.id, { patientId: a.patientId, startsAt, endsAt });
+
+    const key = a.patientId;
+    const agg = byPatient.get(key) || { minStart: startsAt, maxEnd: endsAt };
+    if (startsAt < agg.minStart) agg.minStart = startsAt;
+    if (endsAt > agg.maxEnd) agg.maxEnd = endsAt;
+    byPatient.set(key, agg);
+  }
+
+  const result = new Map();
+  if (apptIndex.size === 0) return result;
+  for (const [apptId] of apptIndex.entries()) result.set(apptId, []);
+
+  // Para cada paciente, buscamos todas as observações no range max (menos roundtrips)
+  for (const [patientId, range] of byPatient.entries()) {
+    const rows = await UserObservation.findAll({
+      where: {
+        patientId,
+        createdAt: { [Op.between]: [range.minStart, range.maxEnd] }
+      },
+      include: [{ model: User, as: 'doctor', attributes: ['id', 'name', 'email'] }],
+      order: [['createdAt', 'ASC']]
+    });
+
+    // Distribui cada observação nas consultas desse paciente cujo intervalo contenha o createdAt
+    for (const r of rows) {
+      const created = new Date(r.createdAt);
+      for (const [apptId, meta] of apptIndex.entries()) {
+        if (meta.patientId !== patientId) continue;
+        if (created >= meta.startsAt && created <= meta.endsAt) {
+          result.get(apptId).push({
+            note: r.note,
+            createdAt: r.createdAt,
+            doctor: r.doctor ? { id: r.doctor.id, name: r.doctor.name, email: r.doctor.email } : null
+          });
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
  * Monta payload com patientAddressFull (string) e mantém patientAddress (obj) como null
  */
 function attachAddressString(json, addressStr) {
@@ -102,6 +159,16 @@ function attachPatientObservation(json, obs) {
           doctor: obs.doctor || null
         }
       : null
+  };
+}
+
+/**
+ * Anexa as observações do período da consulta ao payload
+ */
+function attachAppointmentObservations(json, obsList) {
+  return {
+    ...json,
+    appointmentObservations: Array.isArray(obsList) ? obsList : []
   };
 }
 
@@ -272,6 +339,114 @@ router.get('/doctor/:doctorId', auth(), requireRole('ATENDENTE', 'MEDICO'), asyn
 
       const obs = obsMap.get(x.patientId) || null;
       return attachPatientObservation(withAddr, obs);
+    });
+
+    res.json(data);
+  } catch (e) { next(e); }
+});
+
+// ============ CONSULTAS CONCLUÍDAS + OBS NO PERÍODO ============
+/**
+ * GET /appointments/completed
+ * Lista consultas com status COMPLETED.
+ * Regras de acesso:
+ *  - PACIENTE: apenas as próprias (pode ver observações).
+ *  - MEDICO: apenas as próprias (pode ver observações), opcional filter patientId.
+ *  - ATENDENTE: deve informar patientId OU doctorId; **não** vê o conteúdo das observações.
+ *
+ * Query params:
+ *  - patientId?: number
+ *  - doctorId?: number
+ *  - from?: ISO (filtra startsAt >= from)
+ *  - to?: ISO (filtra startsAt <= to)
+ *  - order?: 'ASC'|'DESC' (default 'DESC')
+ */
+router.get('/completed', auth(), async (req, res, next) => {
+  try {
+    const role = req.user.role;
+    const qPatientId = req.query.patientId ? Number(req.query.patientId) : undefined;
+    const qDoctorId = req.query.doctorId ? Number(req.query.doctorId) : undefined;
+    const qFrom = req.query.from ? new Date(String(req.query.from)) : undefined;
+    const qTo = req.query.to ? new Date(String(req.query.to)) : undefined;
+    const orderDir = (String(req.query.order || 'DESC').toUpperCase() === 'ASC') ? 'ASC' : 'DESC';
+
+    const where = { status: 'COMPLETED' };
+
+    // Permissões e filtros
+    if (role === 'PACIENTE') {
+      where.patientId = req.user.id;
+    } else if (role === 'MEDICO') {
+      where.doctorId = req.user.id;
+      if (qPatientId) where.patientId = qPatientId;
+    } else if (role === 'ATENDENTE') {
+      if (!qPatientId && !qDoctorId) {
+        return res.status(400).json({ error: 'Para atendente, informe patientId ou doctorId' });
+      }
+      if (qPatientId) where.patientId = qPatientId;
+      if (qDoctorId) where.doctorId = qDoctorId;
+    }
+
+    if (qFrom || qTo) {
+      where.startsAt = {};
+      if (qFrom) where.startsAt[Op.gte] = qFrom;
+      if (qTo)   where.startsAt[Op.lte] = qTo;
+    }
+
+    const items = await Appointment.findAll({
+      where,
+      order: [['startsAt', orderDir]],
+      include: baseIncludes
+    });
+
+    await logAction(req, {
+      action: 'APPOINTMENT_LIST_COMPLETED',
+      entityType: null,
+      entityId: null,
+      meta: {
+        role,
+        patientId: where.patientId || null,
+        doctorId: where.doctorId || null,
+        from: qFrom || null,
+        to: qTo || null
+      }
+    });
+
+    const json = items.map(i => (typeof i.toJSON === 'function' ? i.toJSON() : i));
+    const patientIds = json.map(x => x.patientId);
+
+    // Address + última observação (mantém estrutura existente)
+    const [addressMap, latestObsMap] = await Promise.all([
+      getProfileAddressMap(patientIds),
+      getLatestObservationMap(patientIds)
+    ]);
+
+    // Quem pode ver observações?
+    const canSeeObs =
+      role === 'PACIENTE' || role === 'MEDICO';
+
+    // Observações no intervalo de cada consulta (só se permitido)
+    const obsByAppt = canSeeObs ? await getObservationsInAppointmentWindows(json) : null;
+
+    const data = json.map(x => {
+      // endereço
+      let addrStr = addressMap.get(x.patientId) || null;
+      if (!addrStr) addrStr = parseAddressFromNotes(x.notes);
+      const withAddr = attachAddressString(x, addrStr);
+
+      // última observação
+      const latestObs = latestObsMap.get(x.patientId) || null;
+      const withLatest = attachPatientObservation(withAddr, latestObs);
+
+      // observações do período
+      let periodObs = [];
+      if (canSeeObs) {
+        periodObs = (obsByAppt.get(x.id) || []);
+      } else {
+        // atendente não vê conteúdo das notas
+        periodObs = [];
+      }
+
+      return attachAppointmentObservations(withLatest, periodObs);
     });
 
     res.json(data);

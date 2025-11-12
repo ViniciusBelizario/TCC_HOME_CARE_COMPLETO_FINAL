@@ -1,24 +1,18 @@
-<!-- src/views/partials/_sidebar.ejs -->
 <%
 const r = (typeof auth?.role === 'string' ? auth.role : '').toLowerCase();
 const isAdmin = !!auth?.isAdmin;
 const isAtendente = !!auth?.isAtendente;
 const isMedico = !!auth?.isMedico;
 
-// Rota de Pacientes dinâmica:
-// - Médico -> Pacientes de Hoje
-// - Demais -> Pacientes padrão
+// Pacientes dinâmico
 const PACIENTES_PATH = isMedico ? '/medico/pacientes-hoje' : '/pacientes';
-
-// Rota de Agenda dinâmica:
-// - Médico -> agenda exclusiva
-// - Demais -> agenda padrão
 const AGENDA_PATH = isMedico ? '/agenda-medico' : '/agenda';
 
 const ROUTES = {
   dashboard: '/',
   agenda: AGENDA_PATH,
   pacientes: PACIENTES_PATH,
+  concluidas: '/consultas-concluidas', // <- NOVO
   cadastro: '/cadastro',
   relatorio: '/relatorio',
   perfil: '/perfil',
@@ -50,6 +44,13 @@ const ROUTES = {
         <span class="menu__icon">👥</span>
         <span class="menu__text"><%= isMedico ? 'Pacientes de Hoje' : 'Pacientes' %></span>
         <span class="menu__rail"><%= isMedico ? 'Pacientes de Hoje' : 'Pacientes' %></span>
+      </a>
+
+      <!-- NOVO: Concluídas -->
+      <a class="menu__item" href="<%= ROUTES.concluidas %>" data-collapse-on-click title="Concluídas">
+        <span class="menu__icon">✅</span>
+        <span class="menu__text">Concluídas</span>
+        <span class="menu__rail">Concluídas</span>
       </a>
     <% } %>
 
