@@ -1,3 +1,4 @@
+// src/controllers/medico.controller.js
 import fetch from 'node-fetch';
 import { apiGet, apiPatch, apiPost } from '../services/api.service.js';
 
@@ -5,12 +6,10 @@ const API_BASE = process.env.API_BASE_URL || 'http://localhost:3333/api';
 
 /* ---------------- helpers ---------------- */
 function getToken(req, res) {
-  // Authorization: Bearer ...
   const authHdr = (req.headers?.authorization || '').trim();
   const bearer =
     authHdr.toLowerCase().startsWith('bearer ') ? authHdr.slice(7).trim() : null;
 
-  // session / locals com várias chaves possíveis (cobrimos variações)
   const sessionToken =
     req.session?.token ||
     req.session?.auth?.token ||
@@ -18,7 +17,7 @@ function getToken(req, res) {
     req.session?.user?.accessToken ||
     null;
 
-  const cookieToken = req.cookies?.auth_token || null; // ok se undefined
+  const cookieToken = req.cookies?.auth_token || null;
   const localsToken =
     res.locals?.auth?.token ||
     res.locals?.token ||
@@ -61,10 +60,7 @@ export async function getPacientesHojeData(req, res) {
     const start = startOfTodayLocal();
     const end = endOfTodayLocal();
 
-    // Hoje (horário local)
     const today = items.filter(a => isWithin(a?.startsAt, start, end));
-
-    // Abertas: somente CONFIRMED (PENDING não deve aparecer para o médico)
     const open = today.filter(a => a.status === 'CONFIRMED');
     const completed = today.filter(a => a.status === 'COMPLETED');
 
@@ -125,7 +121,21 @@ export async function listarObservacoes(req, res) {
   }
 }
 
-/* ---------------- exames (proxy com token) ---------------- */
+/* ---------------- exames ---------------- */
+export async function listarExamesPaciente(req, res) {
+  try {
+    const token = getToken(req, res);
+    if (!token) return res.status(401).json({ error: 'unauthorized' });
+    const { patientId } = req.params;
+    const data = await apiGet(`/exams/patient/${patientId}`, token);
+    // garante array
+    return res.json(Array.isArray(data) ? data : []);
+  } catch (e) {
+    console.error('listarExamesPaciente:', e);
+    return res.status(400).json({ error: 'list_exams_error' });
+  }
+}
+
 async function pipeBinary(apiUrl, token, res, forceDownload = false) {
   const r = await fetch(apiUrl, { headers: { Authorization: `Bearer ${token}` } });
 
@@ -135,7 +145,6 @@ async function pipeBinary(apiUrl, token, res, forceDownload = false) {
 
   const disp = r.headers.get('content-disposition');
   if (forceDownload) {
-    // Força attachment mantendo nome quando possível
     let filename = 'arquivo';
     const m = disp && disp.match(/filename\*?=(?:UTF-8'')?("?)([^";]+)\1/i);
     if (m) filename = decodeURIComponent(m[2]);
