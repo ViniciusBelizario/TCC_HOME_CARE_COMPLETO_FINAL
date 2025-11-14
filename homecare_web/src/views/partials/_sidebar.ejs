@@ -47,13 +47,17 @@ const ROUTES = {
       </a>
 
       <!-- NOVO: Concluídas -->
-      <a class="menu__item" href="<%= ROUTES.concluidas %>" data-collapse-on-click title="Concluídas">
+      
+    <% } %>
+    
+    <% if (isMedico) { %>
+    <a class="menu__item" href="<%= ROUTES.concluidas %>" data-collapse-on-click title="Concluídas">
         <span class="menu__icon">✅</span>
         <span class="menu__text">Concluídas</span>
         <span class="menu__rail">Concluídas</span>
       </a>
     <% } %>
-
+    
     <% if (isAdmin) { %>
       <a class="menu__item" href="<%= ROUTES.cadastro %>" data-collapse-on-click title="Cadastro">
         <span class="menu__icon">🧩</span>

@@ -47,7 +47,12 @@ router.get('/', auth(false), async (req, res, next) => {
     const { rows, count } = await User.findAndCountAll({
       where: whereClause,
       attributes: ['id', 'name', 'email', 'cpf', 'createdAt', 'updatedAt'],
-      include: [{ model: DoctorProfile, as: 'doctorProfile', attributes: ['crm', 'specialty'] }],
+      include: [{
+        model: DoctorProfile,
+        as: 'doctorProfile',
+        // Agora retorna também o COREN, sem mudar o resto
+        attributes: ['crm', 'coren', 'specialty']
+      }],
       order: [[orderBy, orderDir]],
       limit: pageSize,
       offset: (page - 1) * pageSize
@@ -60,7 +65,9 @@ router.get('/', auth(false), async (req, res, next) => {
       pageSize,
       totalPages: Math.max(Math.ceil(count / pageSize), 1)
     });
-  } catch (e) { next(e); }
+  } catch (e) {
+    next(e);
+  }
 });
 
 module.exports = router;

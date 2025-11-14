@@ -1,3 +1,4 @@
+/* src/public/css/paciente.css */
 /* igual ao que te enviei (inclui botões, modal e toast) */
 .pacientes-container { padding: 16px; }
 .pacientes-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }

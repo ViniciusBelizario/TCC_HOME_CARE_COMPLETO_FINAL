@@ -26,7 +26,7 @@ router.get('/busca', allowRoles('admin', 'atendente', 'medico'), buscarPacientes
 router.get('/:id', allowRoles('admin', 'atendente', 'medico'), pacienteDetalhe);
 router.post('/:id/reset-senha', allowRoles('admin', 'atendente'), resetSenhaPaciente);
 
-// 4) Criação (não conflita com GETs)
+// 4) Criação
 router.post('/', allowRoles('admin', 'atendente'), criarPaciente);
 
 export default router;

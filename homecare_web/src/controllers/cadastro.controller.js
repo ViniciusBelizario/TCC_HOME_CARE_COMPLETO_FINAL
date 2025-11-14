@@ -33,7 +33,10 @@ export async function postCreateAttendant(req, res) {
       return res.status(400).json({ error: 'Preencha todos os campos obrigatórios.' });
     }
     const data = await apiPost('/auth/register/attendant', token, {
-      name, email, cpf: String(cpf).replace(/\D/g, ''), password,
+      name,
+      email,
+      cpf: String(cpf).replace(/\D/g, ''),
+      password,
     });
     return res.status(201).json({ ok: true, data });
   } catch (err) {
@@ -47,13 +50,30 @@ export async function postCreateDoctor(req, res) {
   if (!token) return res.status(401).json({ error: 'Usuário não autenticado (sessão/token ausente).' });
 
   try {
-    const { name, email, cpf, password, specialty, crm } = req.body || {};
-    if (!name || !email || !cpf || !password || !specialty || !crm) {
+    const { name, email, cpf, password, specialty, crm, coren } = req.body || {};
+
+    if (!name || !email || !cpf || !password || !specialty) {
       return res.status(400).json({ error: 'Preencha todos os campos obrigatórios.' });
     }
-    const data = await apiPost('/auth/register/doctor', token, {
-      name, email, cpf: String(cpf).replace(/\D/g, ''), password, specialty, crm: String(crm).toUpperCase(),
-    });
+
+    const hasCrm = !!crm && String(crm).trim() !== '';
+    const hasCoren = !!coren && String(coren).trim() !== '';
+
+    if (!hasCrm && !hasCoren) {
+      return res.status(400).json({ error: 'Informe CRM (para médicos) ou COREN (para enfermeiras).' });
+    }
+
+    const payload = {
+      name,
+      email,
+      cpf: String(cpf).replace(/\D/g, ''),
+      password,
+      specialty,
+      crm: hasCrm ? String(crm).toUpperCase() : null,
+      coren: hasCoren ? String(coren).toUpperCase() : null,
+    };
+
+    const data = await apiPost('/auth/register/doctor', token, payload);
     return res.status(201).json({ ok: true, data });
   } catch (err) {
     const { status, message } = parseApiError(err);
@@ -73,15 +93,26 @@ export async function getDoctors(req, res) {
 
     const list = await apiGet('/doctors', token, query);
     const raw = Array.isArray(list) ? list : (list?.items || list?.data || []);
-    const data = raw.map(d => ({
-      id: d.id,
-      name: d.name,
-      email: d.email,
-      cpf: d.cpf,
-      createdAt: d.createdAt || d.created_at,
-      specialty: d.doctorProfile?.specialty ?? d.specialty ?? '',
-      crm: d.doctorProfile?.crm ?? d.crm ?? '',
-    }));
+
+    const data = raw.map(d => {
+      const specialty = d.doctorProfile?.specialty ?? d.specialty ?? '';
+      const crm = d.doctorProfile?.crm ?? d.crm ?? null;
+      const coren = d.doctorProfile?.coren ?? d.coren ?? null;
+      const registration = crm || coren || '';
+
+      return {
+        id: d.id,
+        name: d.name,
+        email: d.email,
+        cpf: d.cpf,
+        createdAt: d.createdAt || d.created_at,
+        specialty,
+        // usamos o mesmo campo "crm" na view para exibir CRM ou COREN
+        crm: registration,
+        coren,
+      };
+    });
+
     return res.json({ ok: true, data });
   } catch (err) {
     const { status, message } = parseApiError(err);
@@ -157,5 +188,7 @@ function parseApiError(err) {
       return { status, message: joined };
     }
     return { status, message: text };
-  } catch { return { status, message: text }; }
+  } catch {
+    return { status, message: text };
+  }
 }

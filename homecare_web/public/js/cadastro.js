@@ -44,7 +44,7 @@ function openModal(target){
   qsa('.modal-form',overlay).forEach(f=>f.hidden=true);
   const title=qs('#modal-title',overlay);
   if(target==='attendant'){ title.textContent='Cadastrar Atendente'; qs('#form-attendant',overlay).hidden=false; }
-  else { title.textContent='Cadastrar Médico'; qs('#form-doctor',overlay).hidden=false; }
+  else { title.textContent='Cadastrar Médico / Enfermeira'; qs('#form-doctor',overlay).hidden=false; }
   const alert=qs('#form-alert',overlay); alert.hidden=true; alert.className='alert'; alert.textContent='';
   overlay.classList.add('is-open'); body.classList.add('modal-open');
   qs('.modal-form:not([hidden]) input',overlay)?.focus();
@@ -55,14 +55,65 @@ function showAlert(type,msg){ const a=qs('#form-alert'); if(!msg){ a.hidden=true
 
 // ----------------- Validações -----------------
 function validateAttendantPayload(raw){
-  const payload={ name:String(raw.name||'').trim(), email:String(raw.email||'').trim(), cpf:onlyDigits(raw.cpf), password:String(raw.password||'') };
-  const errors=[]; if(!payload.name) errors.push('Nome é obrigatório.'); if(!isEmail(payload.email)) errors.push('E-mail inválido.'); if(payload.cpf.length!==11) errors.push('CPF deve conter 11 dígitos.'); if(payload.password.length<6) errors.push('Senha deve ter ao menos 6 caracteres.');
+  const payload={
+    name:String(raw.name||'').trim(),
+    email:String(raw.email||'').trim(),
+    cpf:onlyDigits(raw.cpf),
+    password:String(raw.password||'')
+  };
+  const errors=[];
+  if(!payload.name) errors.push('Nome é obrigatório.');
+  if(!isEmail(payload.email)) errors.push('E-mail inválido.');
+  if(payload.cpf.length!==11) errors.push('CPF deve conter 11 dígitos.');
+  if(payload.password.length<6) errors.push('Senha deve ter ao menos 6 caracteres.');
   return {payload,errors};
 }
+
 function validateDoctorPayload(raw){
-  const payload={ name:String(raw.name||'').trim(), email:String(raw.email||'').trim(), cpf:onlyDigits(raw.cpf), password:String(raw.password||''), specialty:String(raw.specialty||'').trim(), crm:String(raw.crm||'').trim().toUpperCase() };
-  const errors=[]; if(!payload.name) errors.push('Nome é obrigatório.'); if(!isEmail(payload.email)) errors.push('E-mail inválido.'); if(payload.cpf.length!==11) errors.push('CPF deve conter 11 dígitos.'); if(payload.password.length<6) errors.push('Senha deve ter ao menos 6 caracteres.'); if(!payload.specialty) errors.push('Especialidade é obrigatória.');
-  const CRM_RE=/^CRM-[A-Z]{2}-\d{4,7}$/; if(!CRM_RE.test(payload.crm)) errors.push('CRM inválido (use o formato CRM-UF-123456).');
+  const typeRaw = String(raw.doctorType || 'MEDICO').toUpperCase();
+  const doctorType = (typeRaw === 'ENFERMEIRA' || typeRaw === 'ENFERMEIRO') ? 'ENFERMEIRA' : 'MEDICO';
+
+  const payload = {
+    name: String(raw.name || '').trim(),
+    email: String(raw.email || '').trim(),
+    cpf: onlyDigits(raw.cpf),
+    password: String(raw.password || ''),
+    specialty: String(raw.specialty || '').trim(),
+    doctorType,
+    crm: null,
+    coren: null,
+  };
+
+  const errors=[];
+  if(!payload.name) errors.push('Nome é obrigatório.');
+  if(!isEmail(payload.email)) errors.push('E-mail inválido.');
+  if(payload.cpf.length!==11) errors.push('CPF deve conter 11 dígitos.');
+  if(payload.password.length<6) errors.push('Senha deve ter ao menos 6 caracteres.');
+  if(!payload.specialty) errors.push('Especialidade é obrigatória.');
+
+  const CRM_RE=/^CRM-[A-Z]{2}-\d{4,7}$/;
+  const COREN_RE=/^COREN-(?:[A-Z]{2}-)?\d{4,10}$/;
+
+  if (doctorType === 'MEDICO') {
+    const crm = String(raw.crm || '').trim().toUpperCase();
+    if (!crm) {
+      errors.push('CRM é obrigatório para médicos.');
+    } else if (!CRM_RE.test(crm)) {
+      errors.push('CRM inválido (use o formato CRM-UF-123456).');
+    }
+    payload.crm = crm || null;
+    payload.coren = null;
+  } else {
+    const coren = String(raw.coren || '').trim().toUpperCase();
+    if (!coren) {
+      errors.push('COREN é obrigatório para enfermeiras.');
+    } else if (!COREN_RE.test(coren)) {
+      errors.push('COREN inválido.');
+    }
+    payload.crm = null;
+    payload.coren = coren || null;
+  }
+
   return {payload,errors};
 }
 
@@ -71,11 +122,14 @@ async function loadDoctors(params={}){
   const tbody=qs('#doctors-table tbody'); if(!tbody) return;
   tbody.innerHTML=`<tr><td colspan="7">Carregando...</td></tr>`;
   try{
-    const usp=new URLSearchParams(params); const res=await fetch(`/cadastro/doctors?${usp.toString()}`,{method:'GET'}); const data=await safeJson(res);
+    const usp=new URLSearchParams(params); const res=await fetch(`/cadastro/doctors?${usp.toString()}`,{method:'GET'});
+    const data=await safeJson(res);
     if(!res.ok) throw new Error(data?.error||data?.message||'Falha ao carregar médicos.');
     const items=Array.isArray(data?.data)?data.data:[];
     renderDoctorsTable(items);
-  }catch(err){ tbody.innerHTML=`<tr><td colspan="7" style="color:#b71c1c;">${escapeHtml(err.message||'Erro ao carregar.')}</td></tr>`; }
+  }catch(err){
+    tbody.innerHTML=`<tr><td colspan="7" style="color:#b71c1c;">${escapeHtml(err.message||'Erro ao carregar.')}</td></tr>`;
+  }
 }
 function renderDoctorsTable(items){
   const tbody=qs('#doctors-table tbody');
@@ -95,11 +149,14 @@ async function loadAttendants(params={}){
   const tbody=qs('#attendants-table tbody'); if(!tbody) return;
   tbody.innerHTML=`<tr><td colspan="5">Carregando...</td></tr>`;
   try{
-    const usp=new URLSearchParams(params); const res=await fetch(`/cadastro/attendants?${usp.toString()}`,{method:'GET'}); const data=await safeJson(res);
+    const usp=new URLSearchParams(params); const res=await fetch(`/cadastro/attendants?${usp.toString()}`,{method:'GET'});
+    const data=await safeJson(res);
     if(!res.ok) throw new Error(data?.error||data?.message||'Falha ao carregar atendentes.');
     const items=Array.isArray(data?.data)?data.data:[];
     renderAttendantsTable(items);
-  }catch(err){ tbody.innerHTML=`<tr><td colspan="5" style="color:#b71c1c;">${escapeHtml(err.message||'Erro ao carregar.')}</td></tr>`; }
+  }catch(err){
+    tbody.innerHTML=`<tr><td colspan="5" style="color:#b71c1c;">${escapeHtml(err.message||'Erro ao carregar.')}</td></tr>`;
+  }
 }
 function renderAttendantsTable(items){
   const tbody=qs('#attendants-table tbody');
@@ -132,16 +189,56 @@ async function resetUserPassword(userId){
   });
 }
 
+// ----------------- UI do switch Médico/Enfermeira -----------------
+function setupDoctorTypeToggle(formDoc){
+  if (!formDoc) return;
+  const radios = qsa('input[name="doctorType"]', formDoc);
+  const crmField = formDoc.querySelector('[data-field="crm"]');
+  const corenField = formDoc.querySelector('[data-field="coren"]');
+
+  function apply(type){
+    const isMedico = (type === 'MEDICO');
+    if (crmField) {
+      crmField.classList.toggle('is-hidden', !isMedico);
+      const inp = crmField.querySelector('input[name="crm"]');
+      if (!isMedico && inp) inp.value = '';
+    }
+    if (corenField) {
+      corenField.classList.toggle('is-hidden', isMedico);
+      const inp = corenField.querySelector('input[name="coren"]');
+      if (isMedico && inp) inp.value = '';
+    }
+  }
+
+  const initial = (radios.find(r => r.checked)?.value || 'MEDICO').toUpperCase();
+  apply(initial);
+
+  radios.forEach(r => {
+    r.addEventListener('change', () => {
+      if (r.checked) apply(r.value.toUpperCase());
+    });
+  });
+}
+
 // ----------------- Init -----------------
 document.addEventListener('DOMContentLoaded',()=>{
+
   // Botões cadastro (modal)
-  const btnOpenAtt=qs('#btn-open-attendant'); const btnOpenDoc=qs('#btn-open-doctor'); const overlay=qs('#cadastro-modal');
-  btnOpenAtt?.addEventListener('click',()=>openModal('attendant')); btnOpenDoc?.addEventListener('click',()=>openModal('doctor'));
+  const btnOpenAtt=qs('#btn-open-attendant');
+  const btnOpenDoc=qs('#btn-open-doctor');
+  const overlay=qs('#cadastro-modal');
+
+  btnOpenAtt?.addEventListener('click',()=>openModal('attendant'));
+  btnOpenDoc?.addEventListener('click',()=>openModal('doctor'));
   qsa('[data-close]',overlay).forEach(b=>b.addEventListener('click',closeModal));
 
   // Máscara CPF inputs
   qsa('input[name="cpf"]',overlay).forEach(inp=>{
-    inp.addEventListener('input',()=>{ const caret=inp.selectionStart; inp.value=maskCPF(inp.value); try{inp.setSelectionRange(caret,caret);}catch{} });
+    inp.addEventListener('input',()=>{
+      const caret=inp.selectionStart;
+      inp.value=maskCPF(inp.value);
+      try{inp.setSelectionRange(caret,caret);}catch{}
+    });
   });
 
   // Evitar Enter submeter form sem querer
@@ -155,42 +252,72 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(errors.length){ showAlert('error',errors.join(' ')); return; }
     try{
       setSubmitting(formAtt,true);
-      const res=await fetch('/cadastro/attendant',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      const res=await fetch('/cadastro/attendant',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload)
+      });
       const data=await safeJson(res);
       if(!res.ok){
         let msg=data?.message||data?.error||'Erro ao cadastrar.';
-        if(Array.isArray(data?.errors)&&data.errors.length){ msg=data.errors.map(e=>e?.message||String(e)).join(' '); }
+        if(Array.isArray(data?.errors)&&data.errors.length){
+          msg=data.errors.map(e=>e?.message||String(e)).join(' ');
+        }
         throw new Error(msg);
       }
       showAlert('success','Atendente cadastrado com sucesso!');
       formAtt.reset(); setTimeout(closeModal,900);
       if (qs('#tab-attendants').classList.contains('is-active')) { await doSearchOrRefresh(); }
-    }catch(err){ showAlert('error',err.message||'Erro ao cadastrar.'); } finally{ setSubmitting(formAtt,false); }
+    }catch(err){
+      showAlert('error',err.message||'Erro ao cadastrar.');
+    } finally{
+      setSubmitting(formAtt,false);
+    }
   });
 
   const formDoc=qs('#form-doctor',overlay);
+  setupDoctorTypeToggle(formDoc);
+
   formDoc?.addEventListener('submit',async e=>{
     e.preventDefault(); showAlert('', '');
     const {payload,errors}=validateDoctorPayload(Object.fromEntries(new FormData(formDoc).entries()));
     if(errors.length){ showAlert('error',errors.join(' ')); return; }
     try{
       setSubmitting(formDoc,true);
-      const res=await fetch('/cadastro/doctor',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      const res=await fetch('/cadastro/doctor',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload)
+      });
       const data=await safeJson(res);
       if(!res.ok){
         let msg=data?.message||data?.error||'Erro ao cadastrar.';
-        if(Array.isArray(data?.errors)&&data.errors.length){ msg=data.errors.map(e=>e?.message||String(e)).join(' '); }
+        if(Array.isArray(data?.errors)&&data.errors.length){
+          msg=data.errors.map(e=>e?.message||String(e)).join(' ');
+        }
         throw new Error(msg);
       }
-      showAlert('success','Médico cadastrado com sucesso!');
-      formDoc.reset(); setTimeout(closeModal,900);
+      showAlert('success', payload.doctorType === 'MEDICO'
+        ? 'Médico cadastrado com sucesso!'
+        : 'Enfermeira cadastrada com sucesso!'
+      );
+      formDoc.reset();
+      setupDoctorTypeToggle(formDoc); // volta para o estado padrão (Médico)
+      setTimeout(closeModal,900);
       if (qs('#tab-doctors').classList.contains('is-active')) { await doSearchOrRefresh(); }
-    }catch(err){ showAlert('error',err.message||'Erro ao cadastrar.'); } finally{ setSubmitting(formDoc,false); }
+    }catch(err){
+      showAlert('error',err.message||'Erro ao cadastrar.');
+    } finally{
+      setSubmitting(formDoc,false);
+    }
   });
 
   // Abas
-  const tabBtnDoctors=qs('#tab-btn-doctors'); const tabBtnAtt=qs('#tab-btn-attendants');
-  const panelDoctors=qs('#tab-doctors'); const panelAtt=qs('#tab-attendants');
+  const tabBtnDoctors=qs('#tab-btn-doctors');
+  const tabBtnAtt=qs('#tab-btn-attendants');
+  const panelDoctors=qs('#tab-doctors');
+  const panelAtt=qs('#tab-attendants');
+
   function activateTab(target){
     const isDoctors = target==='doctors';
     tabBtnDoctors.classList.toggle('is-active',isDoctors);
@@ -204,15 +331,21 @@ document.addEventListener('DOMContentLoaded',()=>{
     qs('#search-type').value = isDoctors ? 'doctors' : 'attendants';
     doSearchOrRefresh();
   }
+
   tabBtnDoctors?.addEventListener('click',()=>activateTab('doctors'));
   tabBtnAtt?.addEventListener('click',()=>activateTab('attendants'));
 
   // Busca unificada
-  const selType=qs('#search-type'); const selBy=qs('#search-by'); const inp=qs('#search-term');
-  const btnSearch=qs('#btn-search'); const btnClear=qs('#btn-clear');
+  const selType=qs('#search-type');
+  const selBy=qs('#search-by');
+  const inp=qs('#search-term');
+  const btnSearch=qs('#btn-search');
+  const btnClear=qs('#btn-clear');
 
   async function doSearchOrRefresh(){
-    const type=selType.value; const by=selBy.value; const term=(inp.value||'').trim();
+    const type=selType.value;
+    const by=selBy.value;
+    const term=(inp.value||'').trim();
     const params={};
     if (term) {
       if(by==='cpf') params.cpf = onlyDigits(term);

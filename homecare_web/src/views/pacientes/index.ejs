@@ -1,4 +1,4 @@
-<!--src\views\pacientes\index.ejs-->
+<!-- src/views/pacientes/index.ejs -->
 <link rel="stylesheet" href="/css/paciente.css">
 
 <section class="pacientes-container">
@@ -27,7 +27,7 @@
           <tr data-id="<%= p.id %>">
             <td><%= p.id %></td>
             <td><%= p.name %></td>
-            <td><%= p.patientProfile?.phone || '-' %></td>
+            <td><%= (p.patientProfile && p.patientProfile.phone) || '-' %></td>
             <td><button class="btn btn--sm btn-detail">Detalhe</button></td>
           </tr>
         <% }) %>

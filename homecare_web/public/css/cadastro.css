@@ -91,6 +91,11 @@ body.modal-open #app-main { filter: blur(2px); pointer-events: none; user-select
 .modal-form input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(31,163,177,.12); }
 .modal-actions { margin-top: 16px; display: flex; justify-content: flex-end; gap: 10px; }
 
+/* campo ocupando duas colunas */
+.form-grid-full {
+  grid-column: 1 / -1;
+}
+
 /* Alertas */
 .alert { border-radius: 10px; padding: 10px 12px; margin: 8px 0 12px; font-size: 14px; }
 .alert.error { background: #fdecea; color: #b71c1c; }
@@ -135,7 +140,74 @@ body.modal-open #app-main { filter: blur(2px); pointer-events: none; user-select
 @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes toast-out { to { opacity: 0; transform: translateY(8px); } }
 
+/* Switch Médico / Enfermeira */
+.doctor-type-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,.05);
+  background: #f5f7fb;
+}
+.doctor-type-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.doctor-type-label {
+  font-weight: 600;
+  font-size: 14px;
+}
+.doctor-type-help {
+  font-size: 12px;
+  color: var(--muted);
+}
+.doctor-type-options {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 2px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.08);
+}
+.doctor-type-option {
+  position: relative;
+}
+.doctor-type-option input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.doctor-type-option span {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+}
+.doctor-type-option input:checked + span {
+  background: var(--brand);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(31,163,177,.35);
+}
+
+/* Campos específicos CRM/COREN */
+.doctor-field {}
+
+/* util para esconder */
+.is-hidden {
+  display: none !important;
+}
+
 @media (max-width: 680px) {
   .modal-form .form-grid { grid-template-columns: 1fr; }
   .search-row { align-items: stretch; }
+  .doctor-type-toggle {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

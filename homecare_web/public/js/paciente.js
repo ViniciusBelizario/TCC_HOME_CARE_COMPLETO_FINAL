@@ -109,7 +109,7 @@
   }
   $q?.addEventListener('input', onSearchInput);
 
-  // ===== Detalhe / Cadastro (inalterado exceto pela render) =====
+  // ===== Detalhe =====
   async function abrirDetalhe(id) {
     try {
       const r = await fetch(`/pacientes/${id}`);
@@ -197,6 +197,7 @@
     }
   }
 
+  // ===== Cadastro =====
   function abrirCadastro() {
     const hoje = new Date().toISOString().slice(0, 10);
     const html = `
@@ -242,7 +243,97 @@
       </div>`;
     $slot.innerHTML = html;
     $modalRoot.classList.add('is-open');
-    // ... (restante do cadastro permanece igual à versão anterior)
+
+    const $form = document.getElementById('formCadastro');
+    const $formError = document.getElementById('formError');
+    const $btnSalvar = document.getElementById('btnSalvar');
+    const $cpf = $form.querySelector('input[name="cpf"]');
+    const $phone = $form.querySelector('input[name="phone"]');
+
+    // máscara simples de CPF / telefone (somente números)
+    $cpf?.addEventListener('input', () => {
+      $cpf.value = ($cpf.value || '').replace(/\D/g, '').slice(0, 11);
+    });
+    $phone?.addEventListener('input', () => {
+      $phone.value = ($phone.value || '').replace(/\D/g, '').slice(0, 11);
+    });
+
+    function setError(msg) {
+      if (!$formError) return;
+      $formError.textContent = msg || '';
+    }
+
+    $form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      setError('');
+
+      const formData = new FormData($form);
+      const payload = {
+        name: String(formData.get('name') || '').trim(),
+        email: String(formData.get('email') || '').trim(),
+        cpf: String(formData.get('cpf') || '').replace(/\D/g, ''),
+        password: String(formData.get('password') || ''),
+        phone: String(formData.get('phone') || '').replace(/\D/g, '') || null,
+        address: String(formData.get('address') || '').trim() || null,
+        birthDate: String(formData.get('birthDate') || '') || null,
+      };
+
+      // validação simples
+      if (!payload.name) return setError('Nome é obrigatório.');
+      if (!payload.email) return setError('E-mail é obrigatório.');
+      if (!payload.cpf || payload.cpf.length !== 11) return setError('CPF deve conter 11 dígitos.');
+      if (!payload.password || payload.password.length < 6) return setError('Senha deve ter pelo menos 6 caracteres.');
+
+      $btnSalvar.disabled = true;
+      $btnSalvar.textContent = 'Salvando...';
+
+      try {
+        const r = await fetch('/pacientes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await r.json().catch(() => ({}));
+
+        if (!r.ok) {
+          const msg = data?.error || data?.message || `Erro ao criar paciente (HTTP ${r.status})`;
+          throw new Error(msg);
+        }
+
+        // monta paciente para tabela
+        const novoPaciente = {
+          id: data.id,
+          name: data.name,
+          email: data.email || payload.email,
+          cpf: data.cpf || payload.cpf,
+          patientProfile: {
+            phone: (data.patientProfile && data.patientProfile.phone) || payload.phone || '',
+          },
+        };
+
+        // atualiza estado / tabela
+        const novaLista = [...state.list, novoPaciente];
+        setStateAndRender(novaLista);
+
+        toast({
+          title: 'Paciente cadastrado',
+          message: 'Paciente cadastrado com sucesso.',
+          variant: 'success',
+        });
+
+        fecharModal();
+      } catch (err) {
+        console.error('erro cadastro paciente', err);
+        setError(err?.message || 'Erro ao criar paciente.');
+      } finally {
+        $btnSalvar.disabled = false;
+        $btnSalvar.textContent = 'Salvar';
+      }
+    });
   }
 
   function fecharModal() {

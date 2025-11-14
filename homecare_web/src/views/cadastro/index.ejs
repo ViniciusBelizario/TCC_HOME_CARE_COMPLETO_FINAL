@@ -1,3 +1,4 @@
+<!-- src/views/cadastro/index.ejs -->
 <%-
 // Layout principal deve incluir a sidebar e um <main id="app-main">.
 // Open Sans carregada globalmente.
@@ -14,7 +15,7 @@
       Cadastrar Atendente
     </button>
     <button class="btn btn-secondary" id="btn-open-doctor" type="button">
-      Cadastrar Médico
+      Cadastrar Médico / Enfermeira
     </button>
   </div>
 
@@ -58,7 +59,7 @@
   <!-- Conteúdo das abas -->
   <section id="tab-doctors" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-btn-doctors">
     <div class="list-header">
-      <h2>Médicos</h2>
+      <h2>Médicos / Enfermeiras</h2>
       <button class="btn btn-ghost" id="btn-refresh-doctors" type="button" title="Atualizar">Atualizar</button>
     </div>
     <div class="table-wrapper">
@@ -69,7 +70,7 @@
             <th>E-mail</th>
             <th>CPF</th>
             <th>Especialidade</th>
-            <th>CRM</th>
+            <th>CRM/COREN</th>
             <th>Criado em</th>
           </tr>
         </thead>
@@ -139,9 +140,32 @@
         </div>
       </form>
 
-      <!-- Form Médico -->
+      <!-- Form Médico / Enfermeira -->
       <form id="form-doctor" class="modal-form" hidden novalidate>
         <div class="form-grid">
+
+          <!-- Switch de tipo -->
+          <div class="form-grid-full">
+            <div class="doctor-type-toggle">
+              <div class="doctor-type-text">
+                <span class="doctor-type-label">Tipo de profissional*</span>
+                <small class="doctor-type-help">
+                  Escolha se deseja cadastrar um Médico ou uma Enfermeira. O campo CRM ou COREN será habilitado automaticamente.
+                </small>
+              </div>
+              <div class="doctor-type-options" role="radiogroup" aria-label="Tipo de profissional">
+                <label class="doctor-type-option">
+                  <input type="radio" name="doctorType" value="MEDICO" checked>
+                  <span>Médico</span>
+                </label>
+                <label class="doctor-type-option">
+                  <input type="radio" name="doctorType" value="ENFERMEIRA">
+                  <span>Enfermeira</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
           <label>
             <span>Nome*</span>
             <input type="text" name="name" required />
@@ -160,11 +184,19 @@
           </label>
           <label>
             <span>Especialidade*</span>
-            <input type="text" name="specialty" required placeholder="Ex.: Clínico Geral" />
+            <input type="text" name="specialty" required placeholder="Ex.: Clínico Geral / Enfermagem Domiciliar" />
           </label>
-          <label>
+
+          <!-- Campo CRM (para Médico) -->
+          <label class="doctor-field doctor-field--crm" data-field="crm">
             <span>CRM*</span>
-            <input type="text" name="crm" required placeholder="Ex.: CRM-SP-123456" />
+            <input type="text" name="crm" placeholder="Ex.: CRM-SP-123456" />
+          </label>
+
+          <!-- Campo COREN (para Enfermeira) -->
+          <label class="doctor-field doctor-field--coren is-hidden" data-field="coren">
+            <span>COREN*</span>
+            <input type="text" name="coren" placeholder="Ex.: COREN-998877" />
           </label>
         </div>
 

@@ -164,6 +164,11 @@ export async function criarPaciente(req, res) {
       birthDate,
     };
 
+    // validação básica server-side (evita chamar API com payload vazio)
+    if (!payload.name || !payload.email || !payload.cpf || !payload.password) {
+      return res.status(400).json({ error: 'Preencha nome, e-mail, CPF e senha.' });
+    }
+
     const created = await apiPost('/auth/register/patient', token, payload);
     const norm = normalizePatient(created) || normalizePatient(payload) || {
       id: created?.id ?? created?.userId ?? created?.patient?.id ?? '—',
@@ -174,12 +179,27 @@ export async function criarPaciente(req, res) {
     return res.status(201).json({
       id: norm.id,
       name: norm.name,
+      email: norm.email || payload.email,
+      cpf: norm.cpf || payload.cpf,
       patientProfile: { phone: norm.patientProfile?.phone ?? '' },
     });
   } catch (err) {
     console.error('Erro criarPaciente:', err);
     const status = parseStatusFromError(err) ?? 422;
-    return res.status(status >= 500 ? 422 : status).json({ error: 'Erro ao criar paciente.' });
+
+    // tenta extrair mensagem vinda da API
+    let message = 'Erro ao criar paciente.';
+    try {
+      const m = /=>\s*\d{3}:\s*(.*)$/s.exec(err?.message || '');
+      if (m && m[1]) {
+        const parsed = JSON.parse(m[1]);
+        message = parsed?.message || parsed?.error || message;
+      }
+    } catch {
+      // ignora parse failure
+    }
+
+    return res.status(status >= 500 ? 422 : status).json({ error: message });
   }
 }
 

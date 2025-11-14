@@ -93,8 +93,13 @@ router.post('/register/patient', auth(), requireRole('ATENDENTE'), async (req, r
 
 router.post('/register/doctor', auth(), requireRole('ATENDENTE', 'ADMIN'), async (req, res, next) => {
   try {
-    const { name, email, cpf, password, specialty, crm } = req.body;
-    if (!specialty || !crm) return res.status(400).json({ error: 'specialty e crm são obrigatórios' });
+    const { name, email, cpf, password, specialty, crm, coren } = req.body;
+
+    // Antes exigia specialty e crm.
+    // Agora: specialty continua obrigatório, crm e coren são OPCIONAIS.
+    if (!specialty) {
+      return res.status(400).json({ error: 'specialty é obrigatório' });
+    }
 
     const passwordHash = await hashPassword(password || 'medico123');
     const user = await User.create({
@@ -105,7 +110,13 @@ router.post('/register/doctor', auth(), requireRole('ATENDENTE', 'ADMIN'), async
       role: 'MEDICO',
       mustChangePassword: true // força troca no primeiro login
     });
-    await DoctorProfile.create({ userId: user.id, specialty, crm });
+
+    await DoctorProfile.create({
+      userId: user.id,
+      specialty,
+      crm: crm || null,
+      coren: coren || null
+    });
 
     await logAction(req, {
       action: 'USER_CREATE',
@@ -114,6 +125,7 @@ router.post('/register/doctor', auth(), requireRole('ATENDENTE', 'ADMIN'), async
       meta: { createdRole: 'MEDICO' }
     });
 
+    // Mantém o mesmo formato de resposta que já existia
     res.status(201).json({ id: user.id, name: user.name, email: user.email, role: user.role });
   } catch (e) { next(e); }
 });
